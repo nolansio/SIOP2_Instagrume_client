@@ -1,13 +1,402 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Page d'accueil{% endblock %}
+{% block title %}Accueil - Instagrume{% endblock %}
+
+{% block stylesheets %}<link rel="stylesheet" href="{{ asset('styles/homeStyle.css') }}">{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-</style>
+<div class="container py-4">
+    {# Hero Section moderne #}
+    <div class="hero-section animate-fade-in shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center position-relative">
+                <h1 class="hero-title display-3 fw-bold mb-3">
+                    Instagrume
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Partagez vos fruits et légumes favoris avec la communauté et inspirez une alimentation saine ! 🥗
+                </p>
+                {% if app.user is null %}
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{{ path('app_security_register') }}" class="btn btn-modern btn-primary-modern btn-lg" style="color: white;">
+                            <i class="bi bi-person-plus me-2"></i> Rejoindre la communauté
+                        </a>
+                        <a href="{{ path('app_security_login') }}" class="btn btn-lg btn-outline-secondary" style="border-radius: 12px; font-weight: 600;">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Se connecter
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-<div class="example-wrapper">
-    <h1>Page d'accueil ✅</h1>
+    {# Statistiques rapides (optionnel) #}
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-camera text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="fw-bold mt-3 mb-1" style="color: var(--primary-green);">1,234</h3>
+                    <p class="text-muted mb-0">Publications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-people text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="fw-bold mt-3 mb-1" style="color: var(--primary-green);">567</h3>
+                    <p class="text-muted mb-0">Membres</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px;">
+                <div class="card-body text-center py-4">
+                    <i class="bi bi-heart-fill text-success" style="font-size: 2.5rem;"></i>
+                    <h3 class="fw-bold mt-3 mb-1" style="color: var(--primary-green);">8.9K</h3>
+                    <p class="text-muted mb-0">Likes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Titre de section #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-grid-3x3-gap text-success me-2"></i>
+                Découvrez les publications
+            </h2>
+            <p class="text-muted">Les dernières photos de fruits et légumes partagées par la communauté</p>
+        </div>
+    </div>
+
+    {# Grid des publications modernes #}
+    <div class="row g-4 mb-5">
+        {# 
+            TODO: Remplacer par les vraies données de l'API
+            {% for publication in publications %}
+        #}
+        
+        {# Publication 1 #}
+        <div class="col-12 col-md-6 col-lg-4 animate-fade-in">
+            <div class="publication-card card h-100">
+                {# Image container #}
+                <div style="height: 280px; overflow: hidden; position: relative;">
+                    <img src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=500&h=500&fit=crop" 
+                         class="card-img-top w-100 h-100" 
+                         alt="Fruits frais"
+                         style="object-fit: cover;">
+                </div>
+                
+                <div class="card-body p-4">
+                    {# User info #}
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://ui-avatars.com/api/?name=Marie+Dupont&background=10b981&color=fff" 
+                             class="rounded-circle avatar-modern me-3" 
+                             width="45" 
+                             height="45"
+                             alt="Avatar">
+                        <div class="flex-grow-1">
+                            <a href="{{ path('app_user_profile') }}" class="username-link d-block">
+                                marie_dupont
+                            </a>
+                            <small class="timestamp">Il y a 2 heures</small>
+                        </div>
+                    </div>
+                    
+                    {# Description #}
+                    <p class="publication-description mb-3">
+                        Rien de meilleur pour commencer la journée 🍓✨
+                    </p>
+                    
+                    {# Actions bar #}
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn action-btn action-btn-like flex-grow-1">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            <span class="count-badge">24</span>
+                        </button>
+                        <button class="btn action-btn action-btn-dislike flex-grow-1">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                            <span class="count-badge">1</span>
+                        </button>
+                        <a href="{{ path('app_publication_show') }}" class="btn action-btn action-btn-comment flex-grow-1">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <span class="count-badge">5</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Publication 2 #}
+        <div class="col-12 col-md-6 col-lg-4 animate-fade-in" style="animation-delay: 0.1s;">
+            <div class="publication-card card h-100">
+                <div style="height: 280px; overflow: hidden; position: relative;">
+                    <img src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=500&h=500&fit=crop" 
+                         class="card-img-top w-100 h-100" 
+                         alt="Salade verte"
+                         style="object-fit: cover;">
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://ui-avatars.com/api/?name=Jean+Martin&background=10b981&color=fff" 
+                             class="rounded-circle avatar-modern me-3" 
+                             width="45" 
+                             height="45"
+                             alt="Avatar">
+                        <div class="flex-grow-1">
+                            <a href="{{ path('app_user_profile') }}" class="username-link d-block">
+                                jean_martin
+                            </a>
+                            <small class="timestamp">Il y a 5 heures</small>
+                        </div>
+                    </div>
+                    
+                    <p class="publication-description mb-3">
+                        Ma salade du potager, 100% bio et locale ! 🥗🌱
+                    </p>
+                    
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn action-btn action-btn-like flex-grow-1">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            <span class="count-badge">42</span>
+                        </button>
+                        <button class="btn action-btn action-btn-dislike flex-grow-1">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                            <span class="count-badge">0</span>
+                        </button>
+                        <a href="{{ path('app_publication_show') }}" class="btn action-btn action-btn-comment flex-grow-1">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <span class="count-badge">12</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Publication 3 #}
+        <div class="col-12 col-md-6 col-lg-4 animate-fade-in" style="animation-delay: 0.2s;">
+            <div class="publication-card card h-100">
+                <div style="height: 280px; overflow: hidden; position: relative;">
+                    <img src="https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=500&h=500&fit=crop" 
+                         class="card-img-top w-100 h-100" 
+                         alt="Pommes rouges"
+                         style="object-fit: cover;">
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://ui-avatars.com/api/?name=Sophie+Laurent&background=10b981&color=fff" 
+                             class="rounded-circle avatar-modern me-3" 
+                             width="45" 
+                             height="45"
+                             alt="Avatar">
+                        <div class="flex-grow-1">
+                            <a href="{{ path('app_user_profile') }}" class="username-link d-block">
+                                sophie_laurent
+                            </a>
+                            <small class="timestamp">Il y a 1 jour</small>
+                        </div>
+                    </div>
+                    
+                    <p class="publication-description mb-3">
+                        Récolte de pommes rouges du jour 🍎 Parfait pour la santé !
+                    </p>
+                    
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn action-btn action-btn-like flex-grow-1">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            <span class="count-badge">67</span>
+                        </button>
+                        <button class="btn action-btn action-btn-dislike flex-grow-1">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                            <span class="count-badge">2</span>
+                        </button>
+                        <a href="{{ path('app_publication_show') }}" class="btn action-btn action-btn-comment flex-grow-1">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <span class="count-badge">8</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Publication 4 #}
+        <div class="col-12 col-md-6 col-lg-4 animate-fade-in" style="animation-delay: 0.3s;">
+            <div class="publication-card card h-100">
+                <div style="height: 280px; overflow: hidden; position: relative;">
+                    <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=500&h=500&fit=crop" 
+                         class="card-img-top w-100 h-100" 
+                         alt="Pommes de terre"
+                         style="object-fit: cover;">
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://ui-avatars.com/api/?name=Paul+Bernard&background=10b981&color=fff" 
+                             class="rounded-circle avatar-modern me-3" 
+                             width="45" 
+                             height="45"
+                             alt="Avatar">
+                        <div class="flex-grow-1">
+                            <a href="{{ path('app_user_profile') }}" class="username-link d-block">
+                                paul_bernard
+                            </a>
+                            <small class="timestamp">Il y a 1 jour</small>
+                        </div>
+                    </div>
+                    
+                    <p class="publication-description mb-3">
+                        Belle récolte de pommes de terre bio ! 🥔 Pleines de vitamines
+                    </p>
+                    
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn action-btn action-btn-like flex-grow-1">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            <span class="count-badge">31</span>
+                        </button>
+                        <button class="btn action-btn action-btn-dislike flex-grow-1">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                            <span class="count-badge">1</span>
+                        </button>
+                        <a href="{{ path('app_publication_show') }}" class="btn action-btn action-btn-comment flex-grow-1">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <span class="count-badge">3</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Publication 5 #}
+        <div class="col-12 col-md-6 col-lg-4 animate-fade-in" style="animation-delay: 0.4s;">
+            <div class="publication-card card h-100">
+                <div style="height: 280px; overflow: hidden; position: relative;">
+                    <img src="https://images.unsplash.com/photo-1566385101042-1a0aa0c1268c?w=500&h=500&fit=crop" 
+                         class="card-img-top w-100 h-100" 
+                         alt="Légumes verts"
+                         style="object-fit: cover;">
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://ui-avatars.com/api/?name=Emma+Rousseau&background=10b981&color=fff" 
+                             class="rounded-circle avatar-modern me-3" 
+                             width="45" 
+                             height="45"
+                             alt="Avatar">
+                        <div class="flex-grow-1">
+                            <a href="{{ path('app_user_profile') }}" class="username-link d-block">
+                                emma_rousseau
+                            </a>
+                            <small class="timestamp">Il y a 2 jours</small>
+                        </div>
+                    </div>
+                    
+                    <p class="publication-description mb-3">
+                        Super pour la santé
+                    </p>
+                    
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn action-btn action-btn-like flex-grow-1">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            <span class="count-badge">18</span>
+                        </button>
+                        <button class="btn action-btn action-btn-dislike flex-grow-1">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                            <span class="count-badge">3</span>
+                        </button>
+                        <a href="{{ path('app_publication_show') }}" class="btn action-btn action-btn-comment flex-grow-1">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <span class="count-badge">6</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Publication 6 #}
+        <div class="col-12 col-md-6 col-lg-4 animate-fade-in" style="animation-delay: 0.5s;">
+            <div class="publication-card card h-100">
+                <div style="height: 280px; overflow: hidden; position: relative;">
+                    <img src="https://images.unsplash.com/photo-1528825871115-3581a5387919?w=500&h=500&fit=crop" 
+                         class="card-img-top w-100 h-100" 
+                         alt="Bananes"
+                         style="object-fit: cover;">
+                </div>
+                
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="https://ui-avatars.com/api/?name=Lucas+Petit&background=10b981&color=fff" 
+                             class="rounded-circle avatar-modern me-3" 
+                             width="45" 
+                             height="45"
+                             alt="Avatar">
+                        <div class="flex-grow-1">
+                            <a href="{{ path('app_user_profile') }}" class="username-link d-block">
+                                lucas_petit
+                            </a>
+                            <small class="timestamp">Il y a 3 jours</small>
+                        </div>
+                    </div>
+                    
+                    <p class="publication-description mb-3">
+                        Bananes fraîches !
+                    </p>
+                    
+                    <div class="d-flex gap-2 align-items-center">
+                        <button class="btn action-btn action-btn-like flex-grow-1">
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                            <span class="count-badge">55</span>
+                        </button>
+                        <button class="btn action-btn action-btn-dislike flex-grow-1">
+                            <i class="bi bi-hand-thumbs-down-fill"></i>
+                            <span class="count-badge">0</span>
+                        </button>
+                        <a href="{{ path('app_publication_show') }}" class="btn action-btn action-btn-comment flex-grow-1">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            <span class="count-badge">15</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        {# Fin de la boucle #}
+        {# {% endfor %} #}
+    </div>
+
+    {# Pagination moderne #}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Navigation des publications">
+                <ul class="pagination pagination-modern justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
 </div>
 {% endblock %}
