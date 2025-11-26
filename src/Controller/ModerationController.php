@@ -15,8 +15,14 @@ final class ModerationController extends AbstractController
     #[Route('/moderation/dashboard', name: 'app_moderation')]
     public function index(): Response
     {
+        $session = $request->getSession();
+        $token = $session->get('token-session');
+        $users = json_decode($this->apiLinker->readData('/api/users', $token)); // id, pseudo, role
+        $publications = json_decode($this->apiLinker->readData('/api/publications', $token)); // id, description, auteur, dateCreation    
         return $this->render('moderation/dashboard.html.twig', [
             'controller_name' => 'ModerationController',
+            'users' => $users,
+            'publication' => $publications
         ]);
     }
 
