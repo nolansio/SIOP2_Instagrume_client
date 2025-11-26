@@ -14,9 +14,7 @@ use App\Service\ApiLinker;
 final class SecurityController extends AbstractController
 {
 
-    public function __construct(ApiLinker $apiLinker, JsonConverter $jsonConverter) {
-        $this->apiLinker = $apiLinker;
-        $this->jsonConverter = $jsonConverter;
+    public function __construct(private ApiLinker $apiLinker, private JsonConverter $jsonConverter) {
     }
 
     #[Route('/security/login', name: 'app_security_login')]
@@ -44,7 +42,7 @@ final class SecurityController extends AbstractController
     }
 
     #[Route('/security/register', name: 'app_security_register')]
-    public function register(): Response
+    public function register(Request $request): Response
     {
         return $this->render('security/register.html.twig', [
             'controller_name' => 'SecurityController',
