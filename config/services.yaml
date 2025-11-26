@@ -19,7 +19,7 @@ services:
 
     App\Service\ApiLinker:
         arguments:
-            $apiServerUrl: '%API_SERVER_URL%'
+            $apiServerUrl: '%api_server_url%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
