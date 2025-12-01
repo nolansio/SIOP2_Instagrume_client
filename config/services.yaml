@@ -4,7 +4,8 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    api_server_url: '%kernel.project_dir%/%env(API_SERVER_URL)%'
+    # URL de l'API (sans le kernel.project_dir car c'est une URL HTTP)
+    api_server_url: '%env(API_SERVER_URL)%'
 
 services:
     # default configuration for services in *this* file
@@ -17,6 +18,7 @@ services:
     App\:
         resource: '../src/'
 
+    # Configuration spécifique pour ApiLinker
     App\Service\ApiLinker:
         arguments:
             $apiServerUrl: '%api_server_url%'

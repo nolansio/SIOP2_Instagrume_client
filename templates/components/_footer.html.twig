@@ -1,1 +1,49 @@
-footer
+<footer class="footer-instagram">
+    <div class="container-instagram">
+        <div class="row">
+            {# Liens du footer #}
+            <div class="col-12 mb-3">
+                <div class="footer-links justify-content-center">
+                    <a href="#">À propos</a>
+                    <a href="#">Blog</a>
+                    <a href="#">Emplois</a>
+                    <a href="#">Aide</a>
+                    <a href="#">API</a>
+                    <a href="#">Confidentialité</a>
+                    <a href="#">Conditions</a>
+                    <a href="#">Comptes populaires</a>
+                    <a href="#">Lieux</a>
+                    <a href="#">Instagrume Lite</a>
+                    <a href="#">Chargement des contacts</a>
+                </div>
+            </div>
+
+            {# Sélecteur de langue et copyright #}
+            <div class="col-12">
+                <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-link text-secondary dropdown-toggle" 
+                                type="button" 
+                                data-bs-toggle="dropdown">
+                            <i class="bi bi-globe2 me-1"></i>Français
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Français</a></li>
+                            <li><a class="dropdown-item" href="#">English</a></li>
+                            <li><a class="dropdown-item" href="#">Español</a></li>
+                        </ul>
+                    </div>
+                    <span>© {{ "now"|date("Y") }} Instagrume - Projet BTS SIO</span>
+                </div>
+            </div>
+
+            {# Message pédagogique #}
+            <div class="col-12 text-center mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Projet pédagogique réalisé dans le cadre du BTS SIO - Mangez sainement ! 🥗
+                </small>
+            </div>
+        </div>
+    </div>
+</footer>
