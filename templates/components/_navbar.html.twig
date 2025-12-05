@@ -30,7 +30,7 @@
 
                 {# Accueil #}
                 <li class="nav-item">
-                    <a class="nav-link {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}" 
+                    <a class="nav-link {{ app.request.attributes.get('_route') == 'app_home' ? 'active' : '' }}"
                        href="{{ path('app_home') }}">
                         <i class="bi bi-house-door-fill"></i>
                         <span class="d-lg-none ms-2">Accueil</span>
@@ -39,7 +39,7 @@
 
                 {% if app.session.get('token-session') %}
                     {# Utilisateur connecté #}
-                    
+
                     {# Créer une publication #}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ path('app_publication_new') }}" title="Créer une publication">
@@ -62,9 +62,9 @@
 
                     {# Menu utilisateur #}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" 
-                           href="#" 
-                           role="button" 
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+                           href="#"
+                           role="button"
                            data-bs-toggle="dropdown">
                             <div class="user-avatar-nav" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.8rem;">
                                 {{ app.session.get('username')|default('U')|first|upper }}
