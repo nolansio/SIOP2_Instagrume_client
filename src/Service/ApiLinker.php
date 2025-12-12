@@ -6,7 +6,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ApiLinker
 {
-
 	private $baseURL;
 	private $client;
 
@@ -35,7 +34,6 @@ class ApiLinker
 
 		$response = $this->client->request('POST', $this->baseURL . $url, $options);
 		$content = $response->getContent();
-
 		return $content;
 	}
 
@@ -53,7 +51,6 @@ class ApiLinker
 
 		$response = $this->client->request('GET', $this->baseURL . $url, $options);
 		$content = $response->getContent();
-
 		return $content;
 	}
 
@@ -73,7 +70,6 @@ class ApiLinker
 
 		$response = $this->client->request('PUT', $this->baseURL . $url, $options);
 		$content = $response->getContent();
-
 		return $content;
 	}
 
@@ -91,7 +87,6 @@ class ApiLinker
 
 		$response = $this->client->request('DELETE', $this->baseURL . $url, $options);
 		$content = $response->getContent();
-
 		return $content;
 	}
 }
