@@ -1,39 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    {% include 'components/_head.html.twig' %}
 
-    {% block stylesheets %}{% endblock %}
-    <title>Instagrume - {% block title %}{% endblock %}</title>
 </head>
 <body>
-    {# Navbar #}
-    {% include 'components/_navbar.html.twig' %}
 
-    {# Contenu principal #}
-    <main class="main-content">
-        {# Messages flash (pour les notifications de succès/erreur) #}
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="container-instagram">
-                    <div class="alert alert-instagram alert-{{ label }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endfor %}
-
-        {# Contenu de la page #}
-        {% block body %}{% endblock %}
-    </main>
-
-    {# Footer #}
-    {% include 'components/_footer.html.twig' %}
-
-    {# Scripts JavaScript #}
-    {% block javascripts %}
-        {% block importmap %}{{ importmap('app') }}{% endblock %}
-    {% endblock %}
 </body>
 </html>
