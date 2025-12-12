@@ -1,0 +1,313 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil - Instagrume{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-light-custom">
+    <div class="container">
+        {# Header du profil #}
+        <div class="card shadow-lg border-0 mb-5 animate-on-scroll" style="border-radius: 20px;">
+            <div class="card-body p-5">
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center mb-4 mb-md-0">
+                        {# Avatar #}
+                        {% set userData = app.session.get('user_data') %}
+                        {% if userData and userData.images is not empty %}
+                            <img src="{{ 'http://127.0.0.1:3000' ~ userData.images[0].url }}"
+                            alt="{{ userData.username }}"
+                            class="avatar-xl shadow">
+                        {% else %}
+                            <div class="avatar-xl shadow bg-primary-custom d-flex align-items-center justify-content-center text-white fw-bold fs-1 mx-auto">
+                                {{ userData ? userData.username|slice(0, 1)|upper : '?' }}
+                            </div>
+                        {% endif %}
+                        
+                        <button class="btn btn-outline-primary btn-sm mt-3">
+                            <i class="bi bi-camera"></i> Changer la photo
+                        </button>
+                    </div>
+                    
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h1 class="display-6 fw-bold mb-2">
+                                    {{ userData ? userData.username : 'Utilisateur' }}
+                                </h1>
+                                {% if userData and 'ROLE_MOD' in userData.roles %}
+                                    <span class="badge badge-warning">
+                                        <i class="bi bi-shield-check"></i> Modérateur
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <button class="btn btn-outline-secondary">
+                                <i class="bi bi-gear"></i> Paramètres
+                            </button>
+                        </div>
+                        
+                        {# Statistiques #}
+                        <div class="row g-3 mt-4">
+                            <div class="col-md-4">
+                                <div class="text-center p-3 bg-light-custom rounded-3">
+                                    <div class="display-6 fw-bold text-primary-custom mb-1">
+                                        {{ publications|length }}
+                                    </div>
+                                    <small class="text-muted">Publications</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 bg-light-custom rounded-3">
+                                    <div class="display-6 fw-bold text-secondary-custom mb-1">0</div>
+                                    <small class="text-muted">Likes reçus</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3 bg-light-custom rounded-3">
+                                    <div class="display-6 fw-bold text-primary-custom mb-1">0</div>
+                                    <small class="text-muted">Commentaires</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Onglets #}
+        <ul class="nav nav-pills mb-4 animate-on-scroll stagger-1" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" 
+                        id="publications-tab" 
+                        data-bs-toggle="pill" 
+                        data-bs-target="#publications" 
+                        type="button">
+                    <i class="bi bi-grid-3x3"></i> Mes publications
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" 
+                        id="likes-tab" 
+                        data-bs-toggle="pill" 
+                        data-bs-target="#likes" 
+                        type="button">
+                    <i class="bi bi-heart"></i> Mes likes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" 
+                        id="settings-tab" 
+                        data-bs-toggle="pill" 
+                        data-bs-target="#settings" 
+                        type="button">
+                    <i class="bi bi-sliders"></i> Paramètres
+                </button>
+            </li>
+        </ul>
+
+        {# Contenu des onglets #}
+        <div class="tab-content" id="profileTabsContent">
+            {# Onglet Publications #}
+            <div class="tab-pane fade show active" id="publications" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="mb-0">Mes publications</h3>
+                    <a href="{{ path('app_publication_new') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nouvelle publication
+                    </a>
+                </div>
+
+                {% if publications is not empty %}
+                    <div class="row g-4">
+                        {% for publication in publications %}
+                            <div class="col-lg-4 col-md-6 animate-on-scroll stagger-{{ loop.index % 3 }}">
+                                <article class="card h-100">
+                                    {# Image #}
+                                    {% if publication.images is not empty %}
+                                        <img src="{{ 'http://127.0.0.1:3000' ~ publication.images[0].url }}"
+                                             class="card-img-top" 
+                                             alt="{{ publication.description|slice(0, 50) }}">
+                                    {% endif %}
+
+                                    <div class="card-body">
+                                        <p class="card-text">
+                                            {{ publication.description|length > 100 
+                                                ? publication.description|slice(0, 100) ~ '...' 
+                                                : publication.description }}
+                                        </p>
+
+                                        {# Stats #}
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="d-flex gap-3">
+                                                <span class="text-muted">
+                                                    <i class="bi bi-heart"></i> {{ publication.likes|length }}
+                                                </span>
+                                                <span class="text-muted">
+                                                    <i class="bi bi-chat"></i> {{ publication.comments|length }}
+                                                </span>
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ publication.created_at|date('d/m/Y') }}
+                                            </small>
+                                        </div>
+
+                                        {# Actions #}
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ path('app_publication_show', {id: publication.id}) }}" 
+                                               class="btn btn-sm btn-outline-primary flex-grow-1">
+                                                <i class="bi bi-eye"></i> Voir
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 5rem; color: var(--color-grey-light);"></i>
+                        <h4 class="mt-4 mb-3">Vous n'avez pas encore de publication</h4>
+                        <p class="text-muted mb-4">
+                            Partagez vos premiers fruits et légumes avec la communauté !
+                        </p>
+                        <a href="{{ path('app_publication_new') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> Créer ma première publication
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Onglet Likes #}
+            <div class="tab-pane fade" id="likes" role="tabpanel">
+                <h3 class="mb-4">Publications que j'aime</h3>
+                <div class="text-center py-5">
+                    <i class="bi bi-heart" style="font-size: 5rem; color: var(--color-grey-light);"></i>
+                    <h4 class="mt-4 mb-3">Fonctionnalité à venir</h4>
+                    <p class="text-muted">
+                        Vous pourrez bientôt retrouver ici toutes les publications que vous avez aimées.
+                    </p>
+                </div>
+            </div>
+
+            {# Onglet Paramètres #}
+            <div class="tab-pane fade" id="settings" role="tabpanel">
+                <h3 class="mb-4">Paramètres du compte</h3>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="mb-4">
+                                    <i class="bi bi-person-circle"></i> Informations personnelles
+                                </h5>
+                                
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label fw-semibold">
+                                            Nom d'utilisateur
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            class="form-control" 
+                                            id="username"
+                                            value="{{ userData ? userData.username : '' }}"
+                                            readonly
+                                            style="border-radius: 12px;">
+                                        <small class="text-muted">
+                                            Le nom d'utilisateur ne peut pas être modifié
+                                        </small>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body p-4">
+                                <h5 class="mb-4">
+                                    <i class="bi bi-shield-lock"></i> Sécurité
+                                </h5>
+                                
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="current_password" class="form-label fw-semibold">
+                                            Mot de passe actuel
+                                        </label>
+                                        <input 
+                                            type="password" 
+                                            class="form-control" 
+                                            id="current_password"
+                                            style="border-radius: 12px;">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="new_password" class="form-label fw-semibold">
+                                            Nouveau mot de passe
+                                        </label>
+                                        <input 
+                                            type="password" 
+                                            class="form-control" 
+                                            id="new_password"
+                                            style="border-radius: 12px;">
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label for="confirm_password" class="form-label fw-semibold">
+                                            Confirmer le nouveau mot de passe
+                                        </label>
+                                        <input 
+                                            type="password" 
+                                            class="form-control" 
+                                            id="confirm_password"
+                                            style="border-radius: 12px;">
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Changer le mot de passe
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card border-0 shadow-sm border-danger">
+                            <div class="card-body p-4">
+                                <h5 class="mb-3 text-danger">
+                                    <i class="bi bi-exclamation-triangle"></i> Zone de danger
+                                </h5>
+                                <p class="text-muted mb-3">
+                                    La suppression de votre compte est irréversible. Toutes vos données seront définitivement perdues.
+                                </p>
+                                <button class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Supprimer mon compte
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .nav-pills .nav-link {
+        color: var(--color-dark);
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        transition: all var(--transition-fast);
+        margin-right: 0.5rem;
+    }
+    
+    .nav-pills .nav-link:hover {
+        background-color: var(--color-light);
+    }
+    
+    .nav-pills .nav-link.active {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+    }
+</style>
+{% endblock %}
