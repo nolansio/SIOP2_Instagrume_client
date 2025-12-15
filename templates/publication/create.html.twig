@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer une publication - Instagrume{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i class="bi bi-plus-circle text-success"></i> Créer une publication
+                </h2>
+
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" 
+                                  rows="4" placeholder="Parlez de vos fruits et légumes..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Images</label>
+                        <input type="file" class="form-control" id="images" name="images[]" 
+                               accept="image/*" multiple required>
+                        <small class="form-text text-muted">Vous pouvez sélectionner plusieurs images</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_home') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Publier
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
