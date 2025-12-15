@@ -1,0 +1,240 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Publication - Instagrume{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg">
+            {# Images #}
+            {% if publication.images is not empty %}
+                {% if publication.images|length == 1 %}
+                    <img src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                         class="card-img-top" 
+                         alt="{{ publication.description }}"
+                         style="max-height: 500px; object-fit: contain; background: #f8f9fa;">
+                {% else %}
+                    <div id="carousel-detail" class="carousel slide" data-bs-ride="false">
+                        <div class="carousel-inner">
+                            {% for image in publication.images %}
+                                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                    <img src="https://127.0.0.1:3000{{ image.url }}" 
+                                         class="d-block w-100" 
+                                         alt="{{ publication.description }}"
+                                         style="max-height: 500px; object-fit: contain; background: #f8f9fa;">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel-detail" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel-detail" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                        <div class="carousel-indicators">
+                            {% for image in publication.images %}
+                                <button type="button" data-bs-target="#carousel-detail" 
+                                        data-bs-slide-to="{{ loop.index0 }}" 
+                                        {% if loop.first %}class="active"{% endif %}></button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div class="card-body">
+                {# En-tête #}
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle text-success fs-3 me-2"></i>
+                        <div>
+                            <h5 class="mb-0">
+                                <a href="{{ path('app_user_profile', {username: publication.user.username}) }}" 
+                                   class="text-decoration-none text-dark">
+                                    {{ publication.user.username }}
+                                </a>
+                            </h5>
+                            <small class="text-muted">{{ publication.created_at|date('d/m/Y à H:i') }}</small>
+                        </div>
+                    </div>
+                    
+                    {# Boutons modifier/supprimer #}
+                    {% if app.session.get('user') and app.session.get('user').username == publication.user.username %}
+                        <div>
+                            <a href="{{ path('app_publication_edit', {id: publication.id}) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </a>
+                            <form method="post" action="{{ path('app_publication_delete', {id: publication.id}) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')">
+                                    <i class="bi bi-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Description #}
+                <p class="card-text">{{ publication.description }}</p>
+
+                {# Likes et Dislikes #}
+                <div class="d-flex gap-3 mb-3">
+                    {% if app.session.get('token') %}
+                        {% set userLiked = false %}
+                        {% set userDisliked = false %}
+                        {% set userLikeId = null %}
+                        {% set userDislikeId = null %}
+
+                        {% for like in publication.likes %}
+                            {% if like.user.id == currentUser.id %}
+                                {% set userLiked = true %}
+                                {% set userLikeId = like.id %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% for dislike in publication.dislikes %}
+                            {% if dislike.user.id == currentUser.id %}
+                                {% set userDisliked = true %}
+                                {% set userDislikeId = dislike.id %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {# Bouton Like #}
+                        <form method="post" action="{% if userLiked %}{{ path('app_like_delete', {id: userLikeId}) }}{% else %}{{ path('app_publication_like', {id: publication.id}) }}{% endif %}" class="d-inline">
+                            <button type="submit" class="btn btn-sm {% if userLiked %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                <i class="bi bi-heart{% if userLiked %}-fill{% endif %}"></i> {{ publication.likes|length }}
+                            </button>
+                        </form>
+
+                        {# Bouton Dislike #}
+                        <form method="post" action="{% if userDisliked %}{{ path('app_dislike_delete', {id: userDislikeId}) }}{% else %}{{ path('app_publication_dislike', {id: publication.id}) }}{% endif %}" class="d-inline">
+                            <button type="submit" class="btn btn-sm {% if userDisliked %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                <i class="bi bi-hand-thumbs-down{% if userDisliked %}-fill{% endif %}"></i> {{ publication.dislikes|length }}
+                            </button>
+                        </form>
+                    {% else %}
+                        <span class="text-muted">
+                            <i class="bi bi-heart"></i> {{ publication.likes|length }}
+                            <i class="bi bi-hand-thumbs-down ms-3"></i> {{ publication.dislikes|length }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                {# Boutons de modération pour les publications #}
+                {% if app.session.get('user') and (('ROLE_MOD' in app.session.get('user').roles) or ('ROLE_ADMIN' in app.session.get('user').roles)) %}
+                    <div class="mb-3">
+                        {% if publication.is_locked %}
+                            <form method="post" action="{{ path('app_publication_unlock', {id: publication.id}) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-unlock"></i> Déverrouiller les commentaires
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{{ path('app_publication_lock', {id: publication.id}) }}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-lock"></i> Verrouiller les commentaires
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <hr>
+
+                {# Commentaires #}
+                <h5 class="mb-3">Commentaires ({{ publication.comments|length }})</h5>
+
+                {# Formulaire d'ajout de commentaire #}
+                {% if app.session.get('token') and not publication.is_locked %}
+                    <form method="post" action="{{ path('app_publication_comment', {id: publication.id}) }}" class="mb-4">
+                        <div class="input-group">
+                            <input type="text" name="content" class="form-control" 
+                                   placeholder="Ajouter un commentaire..." required>
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </div>
+                    </form>
+                {% elseif publication.is_locked %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-lock"></i> Cette publication est verrouillée, vous ne pouvez plus commenter.
+                    </div>
+                {% endif %}
+
+                {# Liste des commentaires #}
+                {% if publication.comments is not empty %}
+                    <div class="list-group">
+                        {% for comment in publication.comments %}
+                            {% if comment.original_comment is null %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <strong>{{ comment.user.username }}</strong>
+                                            <p class="mb-1">{{ comment.content }}</p>
+                                            <small class="text-muted">{{ comment.created_at|date('d/m/Y à H:i') }}</small>
+                                            
+                                            {# Bouton répondre #}
+                                            {% if app.session.get('token') and not publication.is_locked %}
+                                                <button class="btn btn-link btn-sm p-0 ms-2" 
+                                                        onclick="document.getElementById('reply-form-{{ comment.id }}').style.display='block'">
+                                                    Répondre
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <small class="text-muted">
+                                                <i class="bi bi-heart"></i> {{ comment.likes|length }}
+                                                <i class="bi bi-hand-thumbs-down ms-2"></i> {{ comment.dislikes|length }}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    {# Formulaire de réponse caché #}
+                                    {% if app.session.get('token') and not publication.is_locked %}
+                                        <form method="post" action="{{ path('app_publication_comment', {id: publication.id}) }}" 
+                                              id="reply-form-{{ comment.id }}" class="mt-2" style="display:none;">
+                                            <input type="hidden" name="original_comment_id" value="{{ comment.id }}">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" name="content" class="form-control" 
+                                                       placeholder="Répondre à {{ comment.user.username }}..." required>
+                                                <button type="submit" class="btn btn-success">
+                                                    <i class="bi bi-send"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-secondary" 
+                                                        onclick="document.getElementById('reply-form-{{ comment.id }}').style.display='none'">
+                                                    Annuler
+                                                </button>
+                                            </div>
+                                        </form>
+                                    {% endif %}
+
+                                    {# Réponses au commentaire #}
+                                    {% if comment.comments is not empty %}
+                                        <div class="ms-4 mt-2">
+                                            {% for reply in comment.comments %}
+                                                <div class="border-start border-3 border-secondary ps-3 mb-2">
+                                                    <strong>{{ reply.user.username }}</strong>
+                                                    <p class="mb-1 small">{{ reply.content }}</p>
+                                                    <small class="text-muted">{{ reply.created_at|date('d/m/Y à H:i') }}</small>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">Aucun commentaire pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            <a href="{{ path('app_home') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour à l'accueil
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -3,233 +3,94 @@
 {% block title %}Accueil - Instagrume{% endblock %}
 
 {% block body %}
-    {# Hero Section #}
-    <section class="hero bg-light-custom position-relative overflow-hidden" style="padding: 6rem 0 4rem;">
-        {# Decorative elements #}
-        <div style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: linear-gradient(135deg, rgba(232, 115, 78, 0.1), rgba(244, 162, 97, 0.1)); border-radius: 50%; filter: blur(80px);"></div>
-        <div style="position: absolute; bottom: -150px; left: -150px; width: 500px; height: 500px; background: linear-gradient(135deg, rgba(45, 80, 22, 0.1), rgba(45, 80, 22, 0.05)); border-radius: 50%; filter: blur(80px);"></div>
-        
-        <div class="container position-relative">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <div class="fade-in-up">
-                        <span class="badge badge-primary mb-3">
-                            <i class="bi bi-leaf"></i> Alimentation saine
-                        </span>
-                        <h1 class="display-3 fw-bold mb-4">
-                            Cultivez la <span class="text-primary-custom">passion</span><br>
-                            des fruits & légumes
-                        </h1>
-                        <p class="lead mb-4 text-muted" style="font-size: 1.2rem;">
-                            Rejoignez notre communauté engagée et partagez vos plus belles récoltes.
-                            Inspirez, découvrez et célébrez une alimentation naturelle et colorée.
-                        </p>
-                        <div class="d-flex gap-3 flex-wrap">
-                            {% if not app.session.get('api_token') %}
-                                <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-person-plus"></i> Rejoindre la communauté
-                                </a>
-                                <a href="{{ path('app_login') }}" class="btn btn-outline-primary btn-lg">
-                                    <i class="bi bi-box-arrow-in-right"></i> Se connecter
-                                </a>
+<div class="text-center mb-5">
+    <h1 class="display-4 mb-3">
+        <i class="bi bi-apple text-success"></i> Instagrume
+    </h1>
+    <p class="lead text-muted">Partagez vos fruits et légumes préférés !</p>
+</div>
+
+{% if publications is empty %}
+    <div class="alert alert-info text-center">
+        <i class="bi bi-info-circle"></i> Aucune publication pour le moment.
+        {% if app.session.get('token') %}
+            Soyez le premier à partager vos fruits et légumes !
+        {% else %}
+            Connectez-vous pour commencer à partager !
+        {% endif %}
+    </div>
+{% else %}
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for publication in publications %}
+            <div class="col">
+                <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="text-decoration-none">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card h-100 shadow-sm">
+                            {% if publication.images is not empty %}
+                                {% if publication.images|length == 1 %}
+                                    {# Une seule image : affichage simple #}
+                                    <img src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                                        class="card-img-top" 
+                                        alt="{{ publication.description }}"
+                                        style="height: 250px; object-fit: cover;">
+                                {% else %}
+                                    {# Plusieurs images : carousel #}
+                                    <div id="carousel-{{ publication.id }}" class="carousel slide" data-bs-ride="false">
+                                        <div class="carousel-inner">
+                                            {% for image in publication.images %}
+                                                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                                    <img src="https://127.0.0.1:3000{{ image.url }}" 
+                                                        class="d-block w-100" 
+                                                        alt="{{ publication.description }}"
+                                                        style="height: 250px; object-fit: cover;">
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ publication.id }}" data-bs-slide="prev">
+                                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        </button>
+                                        <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ publication.id }}" data-bs-slide="next">
+                                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        </button>
+                                        <div class="carousel-indicators">
+                                            {% for image in publication.images %}
+                                                <button type="button" data-bs-target="#carousel-{{ publication.id }}" 
+                                                        data-bs-slide-to="{{ loop.index0 }}" 
+                                                        {% if loop.first %}class="active"{% endif %}></button>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
                             {% else %}
-                                <a href="{{ path('app_publication_new') }}" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-camera"></i> Publier une photo
-                                </a>
-                                <a href="{{ path('app_publications') }}" class="btn btn-outline-primary btn-lg">
-                                    <i class="bi bi-grid"></i> Parcourir
-                                </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6 fade-in-up stagger-2">
-                    <div class="position-relative">
-                        {# Placeholder image - à remplacer avec une vraie image #}
-                        <div style="background: linear-gradient(135deg, #2D5016, #E8734E); height: 450px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
-                            <i class="bi bi-image" style="font-size: 8rem; color: rgba(255, 255, 255, 0.2);"></i>
-                            <div style="position: absolute; inset: 0; background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%221%22 fill=%22white%22 opacity=%220.1%22/></svg>'); opacity: 0.3;"></div>
-                        </div>
-                        {# Floating badge #}
-                        <div class="position-absolute" style="top: 20px; left: -20px; background: white; padding: 1rem 1.5rem; border-radius: 16px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); animation: float 3s ease-in-out infinite;">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-heart-fill" style="color: #E8734E; font-size: 1.5rem;"></i>
-                                <div>
-                                    <div class="fw-bold">12,345</div>
-                                    <small class="text-muted">Membres actifs</small>
+                                <div class="bg-light d-flex align-items-center justify-content-center" 
+                                    style="height: 250px;">
+                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
                                 </div>
+                            {% endif %}
+                            
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <strong class="me-2">
+                                        <a href="{{ path('app_user_profile', {username: publication.user.username}) }}" 
+                                        class="text-decoration-none text-dark">
+                                            <i class="bi bi-person-circle"></i> {{ publication.user.username }}
+                                        </a>
+                                    </strong>
+                                </div>
+                                <p class="card-text small">{{ publication.description }}</p>
+                            </div>
+                            
+                            <div class="card-footer bg-transparent">
+                                <small class="text-muted">
+                                    <i class="bi bi-heart"></i> {{ publication.likes|length }}
+                                    <i class="bi bi-chat ms-2"></i> {{ publication.comments|length }}
+                                </small>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
-        </div>
-        
-        <style>
-            @keyframes float {
-                0%, 100% { transform: translateY(0px); }
-                50% { transform: translateY(-20px); }
-            }
-        </style>
-    </section>
-
-    {# Stats Section #}
-    <section class="py-5 bg-primary-custom text-white">
-        <div class="container">
-            <div class="row text-center g-4">
-                <div class="col-md-3 col-6 animate-on-scroll">
-                    <div class="display-4 fw-bold mb-2">1K+</div>
-                    <div class="text-white-50">Publications</div>
-                </div>
-                <div class="col-md-3 col-6 animate-on-scroll stagger-1">
-                    <div class="display-4 fw-bold mb-2">500+</div>
-                    <div class="text-white-50">Membres</div>
-                </div>
-                <div class="col-md-3 col-6 animate-on-scroll stagger-2">
-                    <div class="display-4 fw-bold mb-2">5K+</div>
-                    <div class="text-white-50">Likes</div>
-                </div>
-                <div class="col-md-3 col-6 animate-on-scroll stagger-3">
-                    <div class="display-4 fw-bold mb-2">2K+</div>
-                    <div class="text-white-50">Commentaires</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    {# Publications Grid #}
-    <section class="py-5" style="padding: 4rem 0;">
-        <div class="container">
-            <div class="text-center mb-5 animate-on-scroll">
-                <h2 class="display-4 fw-bold mb-3">
-                    Découvrez les <span class="text-secondary-custom">dernières</span> publications
-                </h2>
-                <p class="lead text-muted">
-                    Une sélection inspirante de fruits et légumes partagés par notre communauté
-                </p>
-            </div>
-
-            {% if publications is not empty %}
-                <div class="row g-4">
-                    {% for publication in publications %}
-                        <div class="col-lg-4 col-md-6 animate-on-scroll stagger-{{ loop.index % 4 }}">
-                            <article class="card h-100">
-                                {# Image de la publication #}
-                                {% if publication.images is not empty %}
-                                    <img src="{{ 'http://127.0.0.1:3000' ~ publication.images[0].url }}"
-                                         class="card-img-top" 
-                                         alt="{{ publication.description|slice(0, 50) }}"
-                                         loading="lazy">
-                                {% else %}
-                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 280px;">
-                                        <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
-                                    </div>
-                                {% endif %}
-
-                                <div class="card-body">
-                                    {# User info #}
-                                    <div class="d-flex align-items-center mb-3">
-                                        {% if publication.user.images is defined and publication.user.images is not empty %}
-                                            <img src="{{ 'http://127.0.0.1:3000' ~ publication.user.images[0].url }}" 
-                                                 alt="{{ publication.user.username }}"
-                                                 class="avatar me-2">
-                                        {% else %}
-                                            <div class="avatar me-2 bg-primary-custom d-flex align-items-center justify-content-center text-white">
-                                                {{ publication.user.username|slice(0, 1)|upper }}
-                                            </div>
-                                        {% endif %}
-                                        <div>
-                                            <strong>{{ publication.user.username }}</strong>
-                                            <br>
-                                            <small class="text-muted">
-                                                <i class="bi bi-clock"></i>
-                                                {{ publication.created_at|date('d/m/Y') }}
-                                            </small>
-                                        </div>
-                                    </div>
-
-                                    {# Description #}
-                                    <p class="card-text">
-                                        {{ publication.description|length > 100 
-                                            ? publication.description|slice(0, 100) ~ '...' 
-                                            : publication.description }}
-                                    </p>
-
-                                    {# Actions #}
-                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                                        <div class="d-flex gap-3">
-                                            <span class="text-muted">
-                                                <i class="bi bi-heart"></i> {{ publication.likes|length }}
-                                            </span>
-                                            <span class="text-muted">
-                                                <i class="bi bi-chat"></i> {{ publication.comments|length }}
-                                            </span>
-                                        </div>
-                                        <a href="{{ path('app_publication_show', {id: publication.id}) }}" 
-                                           class="btn btn-sm btn-outline-primary">
-                                            Voir plus
-                                        </a>
-                                    </div>
-                                </div>
-                            </article>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                {# Load more button #}
-                <div class="text-center mt-5">
-                    <a href="{{ path('app_publications') }}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-grid-3x3"></i> Voir toutes les publications
-                    </a>
-                </div>
-            {% else %}
-                {# Empty state #}
-                <div class="text-center py-5">
-                    <i class="bi bi-inbox" style="font-size: 5rem; color: var(--color-grey-light);"></i>
-                    <h3 class="mt-4 mb-3">Aucune publication pour le moment</h3>
-                    <p class="text-muted mb-4">
-                        Soyez le premier à partager vos fruits et légumes !
-                    </p>
-                    {% if app.session.get('api_token') %}
-                        <a href="{{ path('app_publication_new') }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i> Créer ma première publication
-                        </a>
-                    {% else %}
-                        <a href="{{ path('app_register') }}" class="btn btn-primary">
-                            <i class="bi bi-person-plus"></i> Rejoindre Instagrume
-                        </a>
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
-    </section>
-
-    {# CTA Section #}
-    <section class="py-5 bg-light-custom">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-8 mb-4 mb-lg-0 animate-on-scroll">
-                    <h2 class="display-5 fw-bold mb-3">
-                        Prêt à partager votre passion ?
-                    </h2>
-                    <p class="lead text-muted mb-0">
-                        Rejoignez des milliers de passionnés qui célèbrent chaque jour
-                        les bienfaits d'une alimentation naturelle et colorée.
-                    </p>
-                </div>
-                <div class="col-lg-4 text-lg-end animate-on-scroll stagger-1">
-                    {% if not app.session.get('api_token') %}
-                        <a href="{{ path('app_register') }}" class="btn btn-primary btn-lg">
-                            <i class="bi bi-arrow-right-circle"></i> C'est parti !
-                        </a>
-                    {% else %}
-                        <a href="{{ path('app_publication_new') }}" class="btn btn-primary btn-lg">
-                            <i class="bi bi-camera"></i> Publier maintenant
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </section>
+        {% endfor %}
+    </div>
+{% endif %}
 {% endblock %}

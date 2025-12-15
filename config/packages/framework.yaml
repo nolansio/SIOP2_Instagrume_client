@@ -7,6 +7,15 @@ framework:
 
     #esi: true
     #fragments: true
+    http_client:
+        scoped_clients:
+            api.client:
+                base_uri: 'https://127.0.0.1:3000'
+                verify_peer: false  # Pour ignorer les certificats SSL en dev local
+                verify_host: false
+                headers:
+                    'Content-Type': 'application/json'
+                    'Accept': 'application/json'
 
 when@test:
     framework:

@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-class HomeController extends AbstractController
+class PublicationViewController extends AbstractController
 {
     private PublicationService $publicationService;
 
@@ -17,21 +17,22 @@ class HomeController extends AbstractController
         $this->publicationService = $publicationService;
     }
 
-    #[Route('/', name: 'app_home')]
-    public function index(Request $request): Response
+    #[Route('/publication/{id}', name: 'app_publication_view')]
+    public function view(int $id, Request $request): Response
     {
         $token = $request->getSession()->get('token');
+        $user = $request->getSession()->get('user');
 
         try {
-            // Récupérer une sélection aléatoire de publications
-            $publications = $this->publicationService->getRandomPublications(12, $token);
+            $publication = $this->publicationService->getPublicationById($id, $token);
         } catch (\Exception $e) {
-            $publications = [];
-            $this->addFlash('danger', 'Erreur lors du chargement des publications.');
+            $this->addFlash('danger', 'Publication non trouvée.');
+            return $this->redirectToRoute('app_home');
         }
 
-        return $this->render('home/index.html.twig', [
-            'publications' => $publications
+        return $this->render('publication/view.html.twig', [
+            'publication' => $publication,
+            'currentUser' => $user
         ]);
     }
 }
