@@ -12,6 +12,14 @@ class UserService
     }
 
     /**
+     * Récupérer tous les utilisateurs
+     */
+    public function getAllUsers(string $token): array
+    {
+        return $this->apiService->get('/users', $token);
+    }
+
+    /**
      * Récupérer un utilisateur par son ID
      */
     public function getUserById(int $id, ?string $token = null): array
