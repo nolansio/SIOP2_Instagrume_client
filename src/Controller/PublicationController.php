@@ -2,167 +2,137 @@
 
 namespace App\Controller;
 
-use App\Service\ApiLinker;
-use App\Service\SessionManager;
+use App\Service\PublicationService;
+use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class PublicationController extends AbstractController
 {
-    private ApiLinker $apiLinker;
-    private SessionManager $sessionManager;
+    private PublicationService $publicationService;
+    private ApiService $apiService;
 
-    public function __construct(ApiLinker $apiLinker, SessionManager $sessionManager)
+    public function __construct(PublicationService $publicationService, ApiService $apiService)
     {
-        $this->apiLinker = $apiLinker;
-        $this->sessionManager = $sessionManager;
+        $this->publicationService = $publicationService;
+        $this->apiService = $apiService;
     }
 
-    #[Route('/publication/{id}', name: 'app_publication_show', requirements: ['id' => '\d+'])]
-    public function show(int $id): Response
+    #[Route('/publications/creer', name: 'app_publication_create')]
+    public function create(Request $request): Response
     {
-        try {
-            // Pas besoin de token pour voir une publication
-            $response = $this->apiLinker->getData('/publications/id/' . $id, null);
-            $publication = json_decode($response, true);
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Publication introuvable.');
-            return $this->redirectToRoute('app_home');
-        }
+        $token = $request->getSession()->get('token');
 
-        return $this->render('publication/show.html.twig', [
-            'publication' => $publication,
-        ]);
-    }
-
-    #[Route('/publication/nouvelle', name: 'app_publication_new')]
-    public function new(Request $request): Response
-    {
-        // Vérifier que l'utilisateur est connecté
-        if (!$this->sessionManager->hasToken()) {
-            $this->addFlash('warning', 'Vous devez être connecté pour publier.');
+        if (!$token) {
             return $this->redirectToRoute('app_login');
         }
+
+        $error = null;
 
         if ($request->isMethod('POST')) {
             $description = $request->request->get('description');
-            $images = $request->files->get('images');
+
+            // Récupérer les fichiers
+            $uploadedFiles = $request->files->get('images');
+
+            $images = [];
+            if ($uploadedFiles) {
+                if (is_array($uploadedFiles)) {
+                    foreach ($uploadedFiles as $file) {
+                        if ($file instanceof \Symfony\Component\HttpFoundation\File\UploadedFile && $file->isValid()) {
+                            $images[] = $file;
+                        }
+                    }
+                } elseif ($uploadedFiles instanceof \Symfony\Component\HttpFoundation\File\UploadedFile && $uploadedFiles->isValid()) {
+                    $images[] = $uploadedFiles;
+                }
+            }
 
             // Validation
-            if (empty($description)) {
-                $this->addFlash('error', 'La description est obligatoire.');
-                return $this->render('publication/new.html.twig');
+            if (empty($description) && empty($images)) {
+                $error = "Vous devez fournir au moins une description ou une image.";
+            } else {
+                try {
+                    // Préparer les données pour l'API
+                    $formData = [
+                        'description' => $description
+                    ];
+
+                    // Appel API avec multipart/form-data pour l'upload d'images
+                    $response = $this->apiService->postMultipart('/publications', $formData, $images, $token);
+
+                    $this->addFlash('success', 'Publication créée avec succès !');
+                    return $this->redirectToRoute('app_home');
+                } catch (\Exception $e) {
+                    $error = "Erreur lors de la création : " . $e->getMessage();
+                }
             }
-
-            try {
-                $token = $this->sessionManager->getToken();
-
-                // Préparer les données pour l'API (multipart/form-data)
-                // Note: L'ApiLinker actuel ne gère pas les fichiers multipart
-                // Il faudra adapter cette partie selon votre implémentation
-
-                $this->addFlash('success', 'Publication créée avec succès ! 🎉');
-                return $this->redirectToRoute('app_profile');
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la création de la publication.');
-            }
         }
 
-        return $this->render('publication/new.html.twig');
-    }
-
-    #[Route('/mes-publications', name: 'app_profile')]
-    public function profile(): Response
-    {
-        // Vérifier que l'utilisateur est connecté
-        if (!$this->sessionManager->hasToken()) {
-            $this->addFlash('warning', 'Vous devez être connecté pour accéder à votre profil.');
-            return $this->redirectToRoute('app_login');
-        }
-
-        try {
-            $token = $this->sessionManager->getToken();
-
-            // Récupérer les informations de l'utilisateur connecté
-            $userResponse = $this->apiLinker->getData('/users/myself', $token);
-            $userData = json_decode($userResponse, true);
-
-            // Les publications sont dans userData['publications']
-            $publications = $userData['publications'] ?? [];
-        } catch (\Exception $e) {
-            $publications = [];
-        }
-
-        return $this->render('publication/profile.html.twig', [
-            'publications' => $publications,
+        return $this->render('publication/create.html.twig', [
+            'error' => $error
         ]);
     }
 
-    #[Route('/publication/{id}/edit', name: 'app_publication_edit', requirements: ['id' => '\d+'])]
+    #[Route('/publications/{id}/modifier', name: 'app_publication_edit')]
     public function edit(int $id, Request $request): Response
     {
-        // Vérifier que l'utilisateur est connecté
-        if (!$this->sessionManager->hasToken()) {
-            $this->addFlash('warning', 'Vous devez être connecté pour modifier une publication.');
+        $token = $request->getSession()->get('token');
+
+        if (!$token) {
             return $this->redirectToRoute('app_login');
         }
 
-        $token = $this->sessionManager->getToken();
+        try {
+            $publication = $this->publicationService->getPublicationById($id, $token);
+        } catch (\Exception $e) {
+            $this->addFlash('danger', 'Publication non trouvée.');
+            return $this->redirectToRoute('app_home');
+        }
 
-        if ($request->isMethod('PUT') || $request->isMethod('POST')) {
+        $error = null;
+
+        if ($request->isMethod('POST')) {
             $description = $request->request->get('description');
 
             try {
-                $this->apiLinker->putData(
-                    '/publications',
-                    json_encode([
-                        'id' => $id,
-                        'description' => $description
-                    ]),
-                    $token
-                );
+                $this->publicationService->updatePublication([
+                    'id' => $id,
+                    'description' => $description
+                ], $token);
 
                 $this->addFlash('success', 'Publication modifiée avec succès !');
-                return $this->redirectToRoute('app_publication_show', ['id' => $id]);
+                return $this->redirectToRoute('app_home');
             } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la modification.');
+                $error = "Erreur lors de la modification : " . $e->getMessage();
             }
-        }
-
-        // Récupérer la publication à éditer
-        try {
-            $response = $this->apiLinker->getData('/publications/id/' . $id, $token);
-            $publication = json_decode($response, true);
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Publication introuvable.');
-            return $this->redirectToRoute('app_home');
         }
 
         return $this->render('publication/edit.html.twig', [
             'publication' => $publication,
+            'error' => $error
         ]);
     }
 
-    #[Route('/publication/{id}/delete', name: 'app_publication_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
-    public function delete(int $id): Response
+    #[Route('/publications/{id}/supprimer', name: 'app_publication_delete')]
+    public function delete(int $id, Request $request): Response
     {
-        // Vérifier que l'utilisateur est connecté
-        if (!$this->sessionManager->hasToken()) {
-            $this->addFlash('warning', 'Vous devez être connecté pour supprimer une publication.');
+        $token = $request->getSession()->get('token');
+
+        if (!$token) {
             return $this->redirectToRoute('app_login');
         }
 
         try {
-            $token = $this->sessionManager->getToken();
-            $this->apiLinker->deleteData('/publications/id/' . $id, $token);
-
-            $this->addFlash('success', 'Publication supprimée avec succès.');
+            $this->publicationService->deletePublication($id, $token);
+            $this->addFlash('success', 'Publication supprimée avec succès !');
         } catch (\Exception $e) {
-            $this->addFlash('error', 'Une erreur est survenue lors de la suppression.');
+            $this->addFlash('danger', 'Erreur lors de la suppression.');
         }
 
-        return $this->redirectToRoute('app_profile');
+        return $this->redirectToRoute('app_home');
     }
 }
