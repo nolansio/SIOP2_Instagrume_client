@@ -2,143 +2,127 @@
 
 namespace App\Controller;
 
-use App\Service\ApiLinker;
-use App\Service\SessionManager;
+use App\Service\ApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class SecurityController extends AbstractController
 {
-    private ApiLinker $apiLinker;
-    private SessionManager $sessionManager;
+    private ApiService $apiService;
 
-    public function __construct(ApiLinker $apiLinker, SessionManager $sessionManager)
+    public function __construct(ApiService $apiService)
     {
-        $this->apiLinker = $apiLinker;
-        $this->sessionManager = $sessionManager;
+        $this->apiService = $apiService;
     }
 
-    #[Route('/login', name: 'app_login')]
-    public function login(Request $request): Response
+    #[Route('/inscription', name: 'app_register')]
+    public function register(Request $request): Response
     {
-        // Démarrer explicitement la session
-        $session = $request->getSession();
-        $session->start();
-
-        // Si déjà connecté (token en session), rediriger vers l'accueil
-        if ($this->sessionManager->hasToken()) {
+        // Si déjà connecté, rediriger vers l'accueil
+        if ($request->getSession()->get('token')) {
             return $this->redirectToRoute('app_home');
         }
 
         $error = null;
-        $lastUsername = '';
-
-        if ($request->isMethod('POST')) {
-            $username = $request->request->get('_username');
-            $password = $request->request->get('_password');
-            $lastUsername = $username;
-
-            try {
-                // Appel à l'API pour obtenir le token
-                $response = $this->apiLinker->postData(
-                    '/token',
-                    json_encode([
-                        'username' => $username,
-                        'password' => $password
-                    ]),
-                    null // Pas de token pour la connexion
-                );
-
-                $data = json_decode($response, true);
-
-                if (isset($data['token'])) {
-                    // Sauvegarder le token en session
-                    $this->sessionManager->setToken($data['token']);
-
-                    // Récupérer les infos de l'utilisateur connecté
-                    try {
-                        $userResponse = $this->apiLinker->getData('/users/myself', $data['token']);
-                        $userData = json_decode($userResponse, true);
-                        $this->sessionManager->setUserData($userData);
-                    } catch (\Exception $e) {
-                        // Si on ne peut pas récupérer les infos, ce n'est pas bloquant
-                    }
-
-                    $this->addFlash('success', 'Connexion réussie ! Bienvenue ' . $username . ' 👋');
-                    return $this->redirectToRoute('app_home');
-                } else {
-                    $error = 'Identifiants invalides.';
-                }
-            } catch (\Exception $e) {
-                $error = 'Identifiants invalides ou erreur de connexion.';
-            }
-        }
-
-        return $this->render('security/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-        ]);
-    }
-
-    #[Route('/register', name: 'app_register')]
-    public function register(Request $request): Response
-    {
-        // Si déjà connecté, rediriger vers l'accueil
-        if ($this->sessionManager->hasToken()) {
-            return $this->redirectToRoute('app_home');
-        }
 
         if ($request->isMethod('POST')) {
             $username = $request->request->get('username');
             $password = $request->request->get('password');
-            $passwordConfirm = $request->request->get('password_confirm');
+            $confirmPassword = $request->request->get('confirm_password');
 
-            // Validation simple
-            if (empty($username) || empty($password)) {
-                $this->addFlash('error', 'Tous les champs sont obligatoires.');
-                return $this->render('security/register.html.twig');
-            }
-
-            if ($password !== $passwordConfirm) {
-                $this->addFlash('error', 'Les mots de passe ne correspondent pas.');
-                return $this->render('security/register.html.twig');
-            }
-
-            if (strlen($password) < 6) {
-                $this->addFlash('error', 'Le mot de passe doit contenir au moins 6 caractères.');
-                return $this->render('security/register.html.twig');
-            }
-
-            // Appel à l'API pour créer le compte
-            try {
-                $response = $this->apiLinker->postData(
-                    '/users',
-                    json_encode([
+            // Validation basique
+            if ($password !== $confirmPassword) {
+                $error = "Les mots de passe ne correspondent pas.";
+            } elseif (strlen($password) < 6) {
+                $error = "Le mot de passe doit contenir au moins 6 caractères.";
+            } else {
+                try {
+                    // Appel à l'API pour créer l'utilisateur (sans email)
+                    $response = $this->apiService->post('/users', [
                         'username' => $username,
-                        'password' => $password,
-                    ]),
-                    null // Pas de token pour l'inscription
-                );
+                        'password' => $password
+                    ]);
 
-                $this->addFlash('success', 'Votre compte a été créé avec succès ! Vous pouvez maintenant vous connecter.');
-                return $this->redirectToRoute('app_login');
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la création du compte. Le nom d\'utilisateur existe peut-être déjà.');
+                    // Rediriger vers la page de connexion
+                    $this->addFlash('success', 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
+                    return $this->redirectToRoute('app_login');
+                } catch (\Exception $e) {
+                    $error = "Erreur lors de l'inscription : " . $e->getMessage();
+                }
             }
         }
 
-        return $this->render('security/register.html.twig');
+        return $this->render('security/register.html.twig', [
+            'error' => $error
+        ]);
     }
 
-    #[Route('/logout', name: 'app_logout')]
-    public function logout(): Response
+    #[Route('/connexion', name: 'app_login')]
+    public function login(Request $request): Response
     {
-        // Supprimer le token et les données utilisateur de la session
-        $this->sessionManager->logout();
+        // Si déjà connecté, rediriger vers l'accueil
+        if ($request->getSession()->get('token')) {
+            return $this->redirectToRoute('app_home');
+        }
 
-        $this->addFlash('info', 'Vous avez été déconnecté avec succès.');
+        $error = null;
+
+        if ($request->isMethod('POST')) {
+            $username = $request->request->get('username');
+            $password = $request->request->get('password');
+
+            try {
+                // Appel à l'API pour obtenir le token
+                $response = $this->apiService->post('/token', [
+                    'username' => $username,
+                    'password' => $password
+                ]);
+
+                // IMPORTANT : Récupérer les infos utilisateur AVANT de stocker en session
+                $token = $response['token'];
+                $userInfo = $this->apiService->get('/users/myself', $token);
+
+                // Stocker le token et les infos utilisateur en session SEULEMENT si tout a réussi
+                $session = $request->getSession();
+                $session->set('token', $token);
+                $session->set('user', $userInfo);
+
+                $this->addFlash('success', 'Connexion réussie !');
+                return $this->redirectToRoute('app_home');
+            } catch (\Exception $e) {
+                // Nettoyer la session en cas d'erreur
+                $session = $request->getSession();
+                $session->remove('token');
+                $session->remove('user');
+
+                $error = "Identifiants incorrects.";
+            }
+        }
+
+        return $this->render('security/login.html.twig', [
+            'error' => $error
+        ]);
+    }
+
+    #[Route('/deconnexion', name: 'app_logout')]
+    public function logout(Request $request): Response
+    {
+        // Récupérer la session
+        $session = $request->getSession();
+
+        // Supprimer explicitement les données
+        $session->remove('token');
+        $session->remove('user');
+
+        // Vider complètement la session
+        $session->clear();
+
+        // Invalider la session
+        $session->invalidate();
+
+        $this->addFlash('success', 'Vous êtes déconnecté.');
         return $this->redirectToRoute('app_home');
     }
 }
