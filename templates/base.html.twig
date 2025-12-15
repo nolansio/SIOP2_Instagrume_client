@@ -3,459 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Instagrume - Partagez vos fruits & légumes{% endblock %}</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-
-    
-    {# Bootstrap CSS #}
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    {# Bootstrap Icons #}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    {# Google Fonts #}
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            /* Palette de couleurs sophistiquée */
-            --color-primary: #2D5016;      /* Vert foncé terreux */
-            --color-secondary: #E8734E;    /* Orange terracotta */
-            --color-accent: #F4A261;       /* Abricot */
-            --color-dark: #1a1a1a;
-            --color-light: #f8f6f3;        /* Crème */
-            --color-white: #ffffff;
-            --color-grey: #6b6b6b;
-            --color-grey-light: #e0e0e0;
-            
-            /* Typographie */
-            --font-display: 'Playfair Display', serif;
-            --font-body: 'Inter', sans-serif;
-            
-            /* Espacements */
-            --spacing-xs: 0.5rem;
-            --spacing-sm: 1rem;
-            --spacing-md: 2rem;
-            --spacing-lg: 4rem;
-            --spacing-xl: 6rem;
-            
-            /* Transitions */
-            --transition-fast: 0.2s ease;
-            --transition-normal: 0.3s ease;
-            --transition-slow: 0.5s ease;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: var(--font-body);
-            background-color: var(--color-light);
-            color: var(--color-dark);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-        
-        /* Typographie */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-display);
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 900;
-        }
-        
-        h2 {
-            font-size: clamp(2rem, 4vw, 3rem);
-        }
-        
-        h3 {
-            font-size: clamp(1.5rem, 3vw, 2rem);
-        }
-        
-        p {
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        a {
-            color: var(--color-primary);
-            text-decoration: none;
-            transition: color var(--transition-fast);
-        }
-        
-        a:hover {
-            color: var(--color-secondary);
-        }
-        
-        /* Navigation */
-        .navbar {
-            background-color: var(--color-white);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
-            padding: var(--spacing-sm) 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            transition: all var(--transition-normal);
-        }
-        
-        .navbar-brand {
-            font-family: var(--font-display);
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: var(--color-primary) !important;
-            letter-spacing: -0.02em;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .navbar-brand:hover {
-            color: var(--color-secondary) !important;
-            transform: scale(1.02);
-        }
-        
-        .navbar-brand i {
-            font-size: 2rem;
-            color: var(--color-secondary);
-        }
-        
-        .nav-link {
-            color: var(--color-dark) !important;
-            font-weight: 500;
-            padding: 0.5rem 1rem !important;
-            margin: 0 0.2rem;
-            border-radius: 8px;
-            transition: all var(--transition-fast);
-        }
-        
-        .nav-link:hover {
-            background-color: var(--color-light);
-            color: var(--color-primary) !important;
-            transform: translateY(-2px);
-        }
-        
-        .nav-link.active {
-            background-color: var(--color-primary);
-            color: var(--color-white) !important;
-        }
-        
-        /* Boutons */
-        .btn {
-            font-weight: 600;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            transition: all var(--transition-normal);
-            border: none;
-            font-family: var(--font-body);
-        }
-        
-        .btn-primary {
-            background-color: var(--color-primary);
-            color: var(--color-white);
-            box-shadow: 0 4px 15px rgba(45, 80, 22, 0.2);
-        }
-        
-        .btn-primary:hover {
-            background-color: #1f3a0f;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(45, 80, 22, 0.3);
-        }
-        
-        .btn-secondary {
-            background-color: var(--color-secondary);
-            color: var(--color-white);
-            box-shadow: 0 4px 15px rgba(232, 115, 78, 0.2);
-        }
-        
-        .btn-secondary:hover {
-            background-color: #d6603a;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(232, 115, 78, 0.3);
-        }
-        
-        .btn-outline-primary {
-            border: 2px solid var(--color-primary);
-            color: var(--color-primary);
-            background-color: transparent;
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: var(--color-primary);
-            color: var(--color-white);
-            transform: translateY(-2px);
-        }
-        
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-        }
-        
-        /* Search bar */
-        .search-wrapper {
-            position: relative;
-            max-width: 400px;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 0.75rem 1rem 0.75rem 3rem;
-            border: 2px solid var(--color-grey-light);
-            border-radius: 50px;
-            font-family: var(--font-body);
-            transition: all var(--transition-fast);
-            background-color: var(--color-white);
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.1);
-        }
-        
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--color-grey);
-            font-size: 1.2rem;
-        }
-        
-        /* Cards */
-        .card {
-            border: none;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all var(--transition-normal);
-            background-color: var(--color-white);
-        }
-        
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-img-top {
-            object-fit: cover;
-            height: 280px;
-            transition: transform var(--transition-slow);
-        }
-        
-        .card:hover .card-img-top {
-            transform: scale(1.05);
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        .card-title {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: var(--color-dark);
-            color: var(--color-white);
-            padding: var(--spacing-lg) 0 var(--spacing-md);
-            margin-top: var(--spacing-xl);
-        }
-        
-        footer a {
-            color: var(--color-grey-light);
-            transition: color var(--transition-fast);
-        }
-        
-        footer a:hover {
-            color: var(--color-white);
-        }
-        
-        .footer-title {
-            font-family: var(--font-display);
-            font-size: 1.3rem;
-            margin-bottom: var(--spacing-sm);
-            color: var(--color-white);
-        }
-        
-        /* Badges & Pills */
-        .badge {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        
-        .badge-primary {
-            background-color: var(--color-primary);
-        }
-        
-        .badge-secondary {
-            background-color: var(--color-secondary);
-        }
-        
-        /* Avatar */
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--color-white);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .avatar-lg {
-            width: 60px;
-            height: 60px;
-        }
-        
-        .avatar-xl {
-            width: 120px;
-            height: 120px;
-        }
-        
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in-up {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        
-        .stagger-1 { animation-delay: 0.1s; }
-        .stagger-2 { animation-delay: 0.2s; }
-        .stagger-3 { animation-delay: 0.3s; }
-        .stagger-4 { animation-delay: 0.4s; }
-        
-        /* Utility Classes */
-        .text-primary-custom {
-            color: var(--color-primary);
-        }
-        
-        .text-secondary-custom {
-            color: var(--color-secondary);
-        }
-        
-        .bg-primary-custom {
-            background-color: var(--color-primary);
-        }
-        
-        .bg-light-custom {
-            background-color: var(--color-light);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            :root {
-                --spacing-lg: 3rem;
-                --spacing-xl: 4rem;
-            }
-            
-            .navbar-brand {
-                font-size: 1.5rem;
-            }
-            
-            h1 {
-                font-size: 2.5rem;
-            }
-            
-            .card-img-top {
-                height: 220px;
-            }
-        }
-        
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        ::-webkit-scrollbar-track {
-            background: var(--color-light);
-        }
-        
-        ::-webkit-scrollbar-thumb {
-            background: var(--color-primary);
-            border-radius: 5px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--color-secondary);
-        }
-    </style>
-    
+    <title>{% block title %}Instagrume{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
-    {# Navigation #}
-    <nav class="navbar navbar-expand-lg">
+    {# Navbar #}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <div class="container">
             <a class="navbar-brand" href="{{ path('app_home') }}">
-                <i class="bi bi-flower2"></i>
-                Instagrume
+                <i class="bi bi-apple"></i> Instagrume
             </a>
-            
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ path('app_home') }}">
-                            <i class="bi bi-house-door"></i> Accueil
-                        </a>
-                    </li>
-                    
-                    {% if app.session.get('api_token') %}
+                {# Barre de recherche #}
+                <form class="d-flex mx-auto" style="width: 50%;" action="{{ path('app_search') }}" method="get">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Rechercher un utilisateur..." aria-label="Search">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+                
+                <ul class="navbar-nav ms-auto">
+                    {% if app.session.get('token') %}
+                        {# Bouton créer une publication #}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_publications') }}">
-                                <i class="bi bi-grid"></i> Publications
+                            <a class="nav-link btn btn-success text-white me-2" href="{{ path('app_publication_create') }}">
+                                <i class="bi bi-plus-circle"></i> Créer
+                            </a>
+                        </li>
+                        {# Bouton Dashboard pour mod/admin #}
+                        {% if app.session.get('user') and (('ROLE_MOD' in app.session.get('user').roles) or ('ROLE_ADMIN' in app.session.get('user').roles)) %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ path('app_dashboard') }}">
+                                    <i class="bi bi-speedometer2"></i> Dashboard
+                                </a>
+                            </li>
+                        {% endif %}
+                        {# Utilisateur connecté #}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_home') }}">
+                                <i class="bi bi-house"></i> Accueil
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ path('app_profile') }}">
-                                <i class="bi bi-person-circle"></i> Mon Profil
+                            <a class="nav-link" href="{{ path('app_my_profile') }}">
+                                <i class="bi bi-person-circle"></i> 
+                                {% if app.session.get('user') %}
+                                    {{ app.session.get('user').username }}
+                                {% else %}
+                                    Utilisateur
+                                {% endif %}
                             </a>
                         </li>
-                        <li class="nav-item ms-2">
-                            <a class="btn btn-primary btn-sm" href="{{ path('app_publication_new') }}">
-                                <i class="bi bi-plus-circle"></i> Publier
-                            </a>
-                        </li>
-                        <li class="nav-item ms-2">
+                        <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_logout') }}">
                                 <i class="bi bi-box-arrow-right"></i> Déconnexion
                             </a>
                         </li>
                     {% else %}
+                        {# Utilisateur non connecté #}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ path('app_login') }}">
                                 <i class="bi bi-box-arrow-in-right"></i> Connexion
                             </a>
                         </li>
-                        <li class="nav-item ms-2">
-                            <a class="btn btn-primary btn-sm" href="{{ path('app_register') }}">
-                                <i class="bi bi-person-plus"></i> S'inscrire
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('app_register') }}">
+                                <i class="bi bi-person-plus"></i> Inscription
                             </a>
                         </li>
                     {% endif %}
@@ -463,152 +81,25 @@
             </div>
         </div>
     </nav>
-    
-    {# Flash Messages #}
-    {% for type, messages in app.flashes %}
-        <div class="container mt-4">
+
+    {# Messages flash #}
+    <div class="container mt-3">
+        {% for label, messages in app.flashes %}
             {% for message in messages %}
-                <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             {% endfor %}
-        </div>
-    {% endfor %}
-    
-    {# Main Content #}
-    <main>
+        {% endfor %}
+    </div>
+
+    {# Contenu principal #}
+    <main class="container my-4">
         {% block body %}{% endblock %}
     </main>
-    
-    {# Footer #}
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h3 class="footer-title">
-                        <i class="bi bi-flower2 text-secondary-custom"></i>
-                        Instagrume
-                    </h3>
-                    <p class="text-muted">
-                        Partagez votre passion pour une alimentation saine et naturelle.
-                        Ensemble, cultivons une communauté engagée.
-                    </p>
-                </div>
-                
-                <div class="col-md-4 mb-4">
-                    <h5 class="footer-title">Liens rapides</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <a href="{{ path('app_home') }}">
-                                <i class="bi bi-chevron-right"></i> Accueil
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#">
-                                <i class="bi bi-chevron-right"></i> À propos
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#">
-                                <i class="bi bi-chevron-right"></i> Aide
-                            </a>
-                        </li>
-                        <li class="mb-2">
-                            <a href="#">
-                                <i class="bi bi-chevron-right"></i> Conditions d'utilisation
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                
-                <div class="col-md-4 mb-4">
-                    <h5 class="footer-title">Suivez-nous</h5>
-                    <div class="d-flex gap-3 fs-4">
-                        <a href="#" class="text-muted">
-                            <i class="bi bi-facebook"></i>
-                        </a>
-                        <a href="#" class="text-muted">
-                            <i class="bi bi-instagram"></i>
-                        </a>
-                        <a href="#" class="text-muted">
-                            <i class="bi bi-twitter"></i>
-                        </a>
-                        <a href="#" class="text-muted">
-                            <i class="bi bi-youtube"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <hr class="my-4 border-secondary">
-            
-            <div class="row">
-                <div class="col-12 text-center text-muted">
-                    <p class="mb-0">
-                        &copy; {{ "now"|date("Y") }} Instagrume. Tous droits réservés.
-                        <br>
-                        <small>Projet éducatif - BTS SIO</small>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-    
-    {# Bootstrap JS #}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-    {# Custom JS #}
-    <script>
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
-        
-        // Navbar scroll effect
-        let lastScroll = 0;
-        const navbar = document.querySelector('.navbar');
-        
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 50) {
-                navbar.style.boxShadow = '0 4px 25px rgba(0, 0, 0, 0.1)';
-            } else {
-                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.05)';
-            }
-            
-            lastScroll = currentScroll;
-        });
-        
-        // Animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('fade-in-up');
-                }
-            });
-        }, observerOptions);
-        
-        // Observe elements with animation class
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.animate-on-scroll').forEach(el => {
-                observer.observe(el);
-            });
-        });
-    </script>
-    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block javascripts %}{% endblock %}
 </body>
 </html>

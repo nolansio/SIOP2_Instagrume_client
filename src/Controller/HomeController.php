@@ -2,69 +2,36 @@
 
 namespace App\Controller;
 
-use App\Service\ApiLinker;
-use App\Service\SessionManager;
+use App\Service\PublicationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class HomeController extends AbstractController
 {
-    private ApiLinker $apiLinker;
-    private SessionManager $sessionManager;
+    private PublicationService $publicationService;
 
-    public function __construct(ApiLinker $apiLinker, SessionManager $sessionManager)
+    public function __construct(PublicationService $publicationService)
     {
-        $this->apiLinker = $apiLinker;
-        $this->sessionManager = $sessionManager;
+        $this->publicationService = $publicationService;
     }
 
     #[Route('/', name: 'app_home')]
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        // Récupérer une sélection aléatoire de publications depuis l'API
-        try {
-            $response = $this->apiLinker->getData('/publications', null);
-            $publications = json_decode($response, true);
+        $token = $request->getSession()->get('token');
 
-            // Mélanger et limiter à 12 publications
-            shuffle($publications);
-            $publications = array_slice($publications, 0, 12);
+        try {
+            // Récupérer une sélection aléatoire de publications
+            $publications = $this->publicationService->getRandomPublications(12, $token);
         } catch (\Exception $e) {
-            // En cas d'erreur, tableau vide
             $publications = [];
+            $this->addFlash('danger', 'Erreur lors du chargement des publications.');
         }
 
         return $this->render('home/index.html.twig', [
-            'publications' => $publications,
+            'publications' => $publications
         ]);
-    }
-
-    #[Route('/publications', name: 'app_publications')]
-    public function publications(): Response
-    {
-        // Vérifier si l'utilisateur est connecté
-        if (!$this->sessionManager->hasToken()) {
-            $this->addFlash('warning', 'Vous devez être connecté pour accéder à cette page.');
-            return $this->redirectToRoute('app_login');
-        }
-
-        try {
-            $token = $this->sessionManager->getToken();
-            $response = $this->apiLinker->getData('/publications', $token);
-            $publications = json_decode($response, true);
-        } catch (\Exception $e) {
-            $publications = [];
-        }
-
-        return $this->render('publications/index.html.twig', [
-            'publications' => $publications,
-        ]);
-    }
-
-    #[Route('/about', name: 'app_about')]
-    public function about(): Response
-    {
-        return $this->render('home/about.html.twig');
     }
 }
