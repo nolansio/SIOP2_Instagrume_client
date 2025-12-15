@@ -1,0 +1,37 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche - Instagrume{% endblock %}
+
+{% block body %}
+<h2 class="mb-4">
+    <i class="bi bi-search"></i> Recherche d'utilisateurs
+</h2>
+
+{% if query %}
+    <p class="text-muted">Résultats pour : <strong>{{ query }}</strong></p>
+    
+    {% if users is empty %}
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle"></i> Aucun utilisateur trouvé.
+        </div>
+    {% else %}
+        <div class="list-group">
+            {% for username in users %}
+                <a href="{{ path('app_user_profile', {username: username}) }}" 
+                class="list-group-item list-group-item-action">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle fs-3 me-3 text-success"></i>
+                        <div>
+                            <h5 class="mb-1">{{ username }}</h5>
+                        </div>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Utilisez la barre de recherche pour trouver des utilisateurs.
+    </div>
+{% endif %}
+{% endblock %}

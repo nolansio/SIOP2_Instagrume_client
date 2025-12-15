@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ user.username }} - Instagrume{% endblock %}
+
+{% block body %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle text-success" style="font-size: 5rem;"></i>
+                        <div class="ms-4">
+                            <h2 class="mb-1">{{ user.username }}</h2>
+                            <p class="text-muted mb-0">
+                                {% if 'ROLE_ADMIN' in user.roles %}
+                                    <span class="badge bg-danger">Administrateur</span>
+                                {% elseif 'ROLE_MOD' in user.roles %}
+                                    <span class="badge bg-warning">Modérateur</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Utilisateur</span>
+                                {% endif %}
+                                
+                                {% if user.is_banned %}
+                                    <span class="badge bg-dark">Banni</span>
+                                {% endif %}
+                            </p>
+                            <p class="mt-2">
+                                <strong>{{ publications|length }}</strong> publication(s)
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {# Boutons de modération #}
+                    {% if app.session.get('user') and (('ROLE_MOD' in app.session.get('user').roles) or ('ROLE_ADMIN' in app.session.get('user').roles)) %}
+                        <div>
+                            {% if user.is_banned %}
+                                <form method="post" action="{{ path('app_user_deban', {id: user.id}) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-unlock"></i> Débannir
+                                    </button>
+                                </form>
+                            {% else %}
+                                {% if app.session.get('user').username != user.username %}
+                                    <form method="post" action="{{ path('app_user_ban', {id: user.id}) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-danger" 
+                                                onclick="return confirm('Êtes-vous sûr de vouloir bannir cet utilisateur ?')">
+                                            <i class="bi bi-lock"></i> Bannir
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mb-4">Publications de {{ user.username }}</h3>
+
+{% if publications is empty %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Cet utilisateur n'a pas encore de publications.
+    </div>
+{% else %}
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for publication in publications %}
+            <div class="col">
+                <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="text-decoration-none">
+                    <div class="card h-100 shadow-sm">
+                        {% if publication.images is not empty %}
+                            {% if publication.images|length == 1 %}
+                                {# Une seule image : affichage simple #}
+                                <img src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                                     class="card-img-top" 
+                                     alt="{{ publication.description }}"
+                                     style="height: 250px; object-fit: cover;">
+                            {% else %}
+                                {# Plusieurs images : carousel #}
+                                <div id="carousel-{{ publication.id }}" class="carousel slide" data-bs-ride="false">
+                                    <div class="carousel-inner">
+                                        {% for image in publication.images %}
+                                            <div class="carousel-item {% if loop.first %}active{% endif %}">
+                                                <img src="https://127.0.0.1:3000{{ image.url }}" 
+                                                     class="d-block w-100" 
+                                                     alt="{{ publication.description }}"
+                                                     style="height: 250px; object-fit: cover;">
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ publication.id }}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ publication.id }}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    </button>
+                                    <div class="carousel-indicators">
+                                        {% for image in publication.images %}
+                                            <button type="button" data-bs-target="#carousel-{{ publication.id }}" 
+                                                    data-bs-slide-to="{{ loop.index0 }}" 
+                                                    {% if loop.first %}class="active"{% endif %}></button>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 250px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <p class="card-text">{{ publication.description }}</p>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent">
+                            <small class="text-muted">
+                                <i class="bi bi-heart"></i> {{ publication.likes|length }}
+                                <i class="bi bi-chat ms-2"></i> {{ publication.comments|length }}
+                            </small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}
