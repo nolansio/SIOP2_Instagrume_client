@@ -148,4 +148,76 @@ class ApiService
 
         return json_decode($response, true);
     }
+
+    /**
+     * Effectue une requête PUT multipart pour l'upload de fichiers
+     */
+    public function putMultipart(string $endpoint, array $data, ?string $token = null): array
+    {
+        $url = self::API_BASE . $endpoint;
+
+        // Utiliser cURL pour le multipart PUT
+        $ch = curl_init();
+
+        // Préparer les données
+        $postData = [];
+
+        // Ajouter l'ID (requis)
+        if (isset($data['id'])) {
+            $postData['id'] = $data['id'];
+        }
+
+        // Ajouter le username si présent
+        if (isset($data['username']) && !empty($data['username'])) {
+            $postData['username'] = $data['username'];
+        }
+
+        // Ajouter le password si présent
+        if (isset($data['password']) && !empty($data['password'])) {
+            $postData['password'] = $data['password'];
+        }
+
+        // Ajouter l'avatar si présent
+        if (isset($data['avatar']) && $data['avatar'] instanceof \Symfony\Component\HttpFoundation\File\UploadedFile) {
+            $file = $data['avatar'];
+            $pathname = $file->getPathname();
+            if (!empty($pathname) && file_exists($pathname)) {
+                $postData['avatar'] = new \CURLFile(
+                    $pathname,
+                    $file->getMimeType(),
+                    $file->getClientOriginalName()
+                );
+            }
+        }
+
+        // Headers
+        $headers = [
+            'Authorization: Bearer ' . $token
+        ];
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_POSTFIELDS => $postData,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            throw new \Exception("cURL Error: " . $error);
+        }
+
+        if ($httpCode !== 200) {
+            throw new \Exception("HTTP $httpCode: " . $response);
+        }
+
+        return json_decode($response, true);
+    }
 }

@@ -18,7 +18,7 @@ class CommentService
     {
         $data = [
             'content' => $content,
-            'publication_id' => $publicationId
+            'id' => $publicationId
         ];
 
         // N'ajouter original_comment que s'il est vraiment défini et non vide
@@ -38,6 +38,14 @@ class CommentService
             'id' => $id,
             'content' => $content
         ], $token);
+    }
+
+    /**
+     * Supprimer un commentaire
+     */
+    public function deleteComment(int $id, string $token): void
+    {
+        $this->apiService->delete('/comments/id/' . $id, $token);
     }
 
     /**

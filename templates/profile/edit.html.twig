@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil - Instagrume{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i class="bi bi-pencil text-success"></i> Modifier mon profil
+                </h2>
+
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data">
+                    {# Avatar actuel #}
+                    <div class="mb-4 text-center">
+                        {% if user.images is not empty %}
+                            <img src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                                 alt="Avatar" 
+                                 class="rounded-circle mb-3" 
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-circle text-success mb-3" style="font-size: 10rem;"></i>
+                        {% endif %}
+                    </div>
+
+                    {# Nom d'utilisateur #}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nom d'utilisateur</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               value="{{ user.username }}"
+                               placeholder="Laisser vide pour ne pas modifier">
+                        <small class="form-text text-muted">Laisser vide pour ne pas modifier</small>
+                    </div>
+
+                    {# Nouvel avatar #}
+                    <div class="mb-3">
+                        <label for="avatar" class="form-label">Changer l'avatar</label>
+                        <input type="file" 
+                               class="form-control" 
+                               id="avatar" 
+                               name="avatar" 
+                               accept="image/*">
+                        <small class="form-text text-muted">Formats acceptés : JPG, PNG, GIF, WebP...</small>
+                    </div>
+
+                    <hr class="my-4">
+
+                    {# Mot de passe actuel - Obligatoire #}
+                    <h5 class="mb-3">Confirmer votre identité</h5>
+                    
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">
+                            Mot de passe actuel <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="current_password" 
+                               name="current_password"
+                               required>
+                        <small class="form-text text-muted">Requis pour confirmer vos modifications</small>
+                    </div>
+
+                    <hr class="my-4">
+
+                    {# Changer le mot de passe #}
+                    <h5 class="mb-3">Changer le mot de passe (optionnel)</h5>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Nouveau mot de passe</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password"
+                               placeholder="Laisser vide pour ne pas modifier">
+                        <small class="form-text text-muted">Au moins 6 caractères. Laisser vide pour ne pas modifier</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirm_password" class="form-label">Confirmer le nouveau mot de passe</label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="confirm_password" 
+                               name="confirm_password"
+                               placeholder="Confirmation du nouveau mot de passe">
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ path('app_my_profile') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle"></i> Enregistrer les modifications
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
