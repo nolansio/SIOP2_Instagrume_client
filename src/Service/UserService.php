@@ -50,4 +50,29 @@ class UserService
     {
         return $this->apiService->get('/users/myself', $token);
     }
+
+    /**
+     * Mettre à jour le profil de l'utilisateur connecté
+     */
+    public function updateProfile(int $userId, array $data, string $token): array
+    {
+        $requestData = ['id' => $userId];
+
+        // Ajouter username si présent
+        if (!empty($data['username'])) {
+            $requestData['username'] = $data['username'];
+        }
+
+        // Ajouter password si présent
+        if (!empty($data['password'])) {
+            $requestData['password'] = $data['password'];
+        }
+
+        // Ajouter avatar si présent
+        if (isset($data['avatar'])) {
+            $requestData['avatar'] = $data['avatar'];
+        }
+
+        return $this->apiService->putMultipart('/users', $requestData, $token);
+    }
 }
