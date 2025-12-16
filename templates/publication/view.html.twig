@@ -166,19 +166,45 @@
                     <div class="list-group">
                         {% for comment in publication.comments %}
                             {% if comment.original_comment is null %}
-                                <div class="list-group-item">
+                                <div class="list-group-item" id="comment-{{ comment.id }}">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div class="flex-grow-1">
                                             <strong>{{ comment.user.username }}</strong>
-                                            <p class="mb-1">{{ comment.content }}</p>
+                                            <p class="mb-1" id="comment-text-{{ comment.id }}">{{ comment.content }}</p>
                                             <small class="text-muted">{{ comment.created_at|date('d/m/Y à H:i') }}</small>
                                             
-                                            {# Bouton répondre #}
-                                            {% if app.session.get('token') and not publication.is_locked %}
-                                                <button class="btn btn-link btn-sm p-0 ms-2" 
-                                                        onclick="document.getElementById('reply-form-{{ comment.id }}').style.display='block'">
-                                                    Répondre
-                                                </button>
+                                            {# Actions sur le commentaire #}
+                                            {% if app.session.get('token') %}
+                                                {% if not publication.is_locked %}
+                                                    <button class="btn btn-link btn-sm p-0 ms-2" 
+                                                            onclick="document.getElementById('reply-form-{{ comment.id }}').style.display='block'">
+                                                        Répondre
+                                                    </button>
+                                                {% endif %}
+                                                
+                                                {# Boutons éditer/supprimer si c'est son commentaire #}
+                                                {% if app.session.get('user').username == comment.user.username %}
+                                                    <button class="btn btn-link btn-sm p-0 ms-2" 
+                                                            onclick="showEditForm({{ comment.id }}, '{{ comment.content|e('js') }}')">
+                                                        <i class="bi bi-pencil"></i> Modifier
+                                                    </button>
+                                                    <form method="post" action="{{ path('app_comment_delete', {id: comment.id}) }}" class="d-inline">
+                                                        <button type="submit" class="btn btn-link btn-sm p-0 ms-2 text-danger"
+                                                                onclick="return confirm('Supprimer ce commentaire ?')">
+                                                            <i class="bi bi-trash"></i> Supprimer
+                                                        </button>
+                                                    </form>
+                                                {% elseif ('ROLE_MOD' in app.session.get('user').roles or 'ROLE_ADMIN' in app.session.get('user').roles) %}
+                                                    {# Modérateur peut supprimer sauf les commentaires des admins/mods #}
+                                                    {% if 'ROLE_ADMIN' not in comment.user.roles and 'ROLE_MOD' not in comment.user.roles %}
+                                                        <form method="post" action="{{ path('app_comment_delete', {id: comment.id}) }}" class="d-inline">
+                                                            <button type="submit" class="btn btn-link btn-sm p-0 ms-2 text-danger"
+                                                                    onclick="return confirm('Supprimer ce commentaire ?')">
+                                                                <i class="bi bi-trash"></i> Supprimer
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                {% endif %}
                                             {% endif %}
                                         </div>
                                         <div>
@@ -188,6 +214,22 @@
                                             </small>
                                         </div>
                                     </div>
+
+                                    {# Formulaire d'édition caché #}
+                                    <form method="post" action="{{ path('app_comment_edit', {id: comment.id}) }}" 
+                                          id="edit-form-{{ comment.id }}" class="mt-2" style="display:none;">
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" name="content" class="form-control" 
+                                                   id="edit-input-{{ comment.id }}" required>
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="bi bi-check"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-secondary" 
+                                                    onclick="hideEditForm({{ comment.id }})">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </div>
+                                    </form>
 
                                     {# Formulaire de réponse caché #}
                                     {% if app.session.get('token') and not publication.is_locked %}
@@ -212,10 +254,51 @@
                                     {% if comment.comments is not empty %}
                                         <div class="ms-4 mt-2">
                                             {% for reply in comment.comments %}
-                                                <div class="border-start border-3 border-secondary ps-3 mb-2">
+                                                <div class="border-start border-3 border-secondary ps-3 mb-2" id="comment-{{ reply.id }}">
                                                     <strong>{{ reply.user.username }}</strong>
-                                                    <p class="mb-1 small">{{ reply.content }}</p>
+                                                    <p class="mb-1 small" id="comment-text-{{ reply.id }}">{{ reply.content }}</p>
                                                     <small class="text-muted">{{ reply.created_at|date('d/m/Y à H:i') }}</small>
+                                                    
+                                                    {# Actions sur la réponse #}
+                                                    {% if app.session.get('token') %}
+                                                        {% if app.session.get('user').username == reply.user.username %}
+                                                            <button class="btn btn-link btn-sm p-0 ms-2" 
+                                                                    onclick="showEditForm({{ reply.id }}, '{{ reply.content|e('js') }}')">
+                                                                <i class="bi bi-pencil"></i> Modifier
+                                                            </button>
+                                                            <form method="post" action="{{ path('app_comment_delete', {id: reply.id}) }}" class="d-inline">
+                                                                <button type="submit" class="btn btn-link btn-sm p-0 ms-2 text-danger"
+                                                                        onclick="return confirm('Supprimer cette réponse ?')">
+                                                                    <i class="bi bi-trash"></i> Supprimer
+                                                                </button>
+                                                            </form>
+                                                        {% elseif ('ROLE_MOD' in app.session.get('user').roles or 'ROLE_ADMIN' in app.session.get('user').roles) %}
+                                                            {% if 'ROLE_ADMIN' not in reply.user.roles and 'ROLE_MOD' not in reply.user.roles %}
+                                                                <form method="post" action="{{ path('app_comment_delete', {id: reply.id}) }}" class="d-inline">
+                                                                    <button type="submit" class="btn btn-link btn-sm p-0 ms-2 text-danger"
+                                                                            onclick="return confirm('Supprimer cette réponse ?')">
+                                                                        <i class="bi bi-trash"></i> Supprimer
+                                                                    </button>
+                                                                </form>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% endif %}
+
+                                                    {# Formulaire d'édition pour la réponse #}
+                                                    <form method="post" action="{{ path('app_comment_edit', {id: reply.id}) }}" 
+                                                          id="edit-form-{{ reply.id }}" class="mt-2" style="display:none;">
+                                                        <div class="input-group input-group-sm">
+                                                            <input type="text" name="content" class="form-control" 
+                                                                   id="edit-input-{{ reply.id }}" required>
+                                                            <button type="submit" class="btn btn-success">
+                                                                <i class="bi bi-check"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-secondary" 
+                                                                    onclick="hideEditForm({{ reply.id }})">
+                                                                <i class="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
+                                                    </form>
                                                 </div>
                                             {% endfor %}
                                         </div>
@@ -237,4 +320,27 @@
         </div>
     </div>
 </div>
+
+{# JavaScript pour l'édition des commentaires #}
+<script>
+function showEditForm(commentId, currentContent) {
+    // Masquer le texte du commentaire
+    document.getElementById('comment-text-' + commentId).style.display = 'none';
+    
+    // Afficher le formulaire d'édition
+    const form = document.getElementById('edit-form-' + commentId);
+    form.style.display = 'block';
+    
+    // Pré-remplir l'input avec le contenu actuel
+    document.getElementById('edit-input-' + commentId).value = currentContent;
+}
+
+function hideEditForm(commentId) {
+    // Afficher le texte du commentaire
+    document.getElementById('comment-text-' + commentId).style.display = 'block';
+    
+    // Masquer le formulaire d'édition
+    document.getElementById('edit-form-' + commentId).style.display = 'none';
+}
+</script>
 {% endblock %}
