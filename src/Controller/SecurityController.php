@@ -111,9 +111,9 @@ class SecurityController extends AbstractController
                     try {
                         // On ne peut pas récupérer les infos sans token, donc on affiche un message générique
                         // Vous pouvez créer un endpoint spécial dans l'API qui renvoie la date de fin du ban
-                        $error = "Votre compte est temporairement banni. Veuillez contacter un administrateur.";
+                        $error = "Votre compte est temporairement banni.";
                     } catch (\Exception $e2) {
-                        $error = "Votre compte est temporairement banni. Veuillez contacter un administrateur.";
+                        $error = "Votre compte est temporairement banni.";
                     }
                 }
                 // Cas 2 : Utilisateur introuvable (404)
