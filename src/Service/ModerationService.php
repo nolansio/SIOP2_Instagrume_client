@@ -12,42 +12,34 @@ class ModerationService
     }
 
     /**
+     * Verrouiller une publication
+     */
+    public function lockPublication(int $publicationId, string $token): void
+    {
+        $this->apiService->put('/publications/lock/id/' . $publicationId, [], $token);
+    }
+
+    /**
+     * Déverrouiller une publication
+     */
+    public function unlockPublication(int $publicationId, string $token): void
+    {
+        $this->apiService->put('/publications/delock/id/' . $publicationId, [], $token);
+    }
+
+    /**
      * Bannir un utilisateur
      */
-    public function banUser(int $userId, string $token): array
+    public function banUser(int $userId, string $token): void
     {
-        return $this->apiService->put('/users/ban', [
-            'user_id' => $userId
-        ], $token);
+        $this->apiService->put('/users/ban/id/' . $userId, [], $token);
     }
 
     /**
      * Débannir un utilisateur
      */
-    public function debanUser(int $userId, string $token): array
+    public function unbanUser(int $userId, string $token): void
     {
-        return $this->apiService->put('/users/deban', [
-            'user_id' => $userId
-        ], $token);
-    }
-
-    /**
-     * Verrouiller une publication (empêche les commentaires)
-     */
-    public function lockPublication(int $publicationId, string $token): array
-    {
-        return $this->apiService->put('/publications/lock', [
-            'publication_id' => $publicationId
-        ], $token);
-    }
-
-    /**
-     * Déverrouiller une publication (autorise les commentaires)
-     */
-    public function delockPublication(int $publicationId, string $token): array
-    {
-        return $this->apiService->put('/publications/delock', [
-            'publication_id' => $publicationId
-        ], $token);
+        $this->apiService->put('/users/deban/id/' . $userId, [], $token);
     }
 }

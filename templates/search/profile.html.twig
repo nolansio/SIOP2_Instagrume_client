@@ -3,129 +3,101 @@
 {% block title %}{{ user.username }} - Instagrume{% endblock %}
 
 {% block body %}
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card shadow">
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        {# En-tête du profil #}
+        <div class="card shadow-lg mb-4">
             <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-person-circle text-success" style="font-size: 5rem;"></i>
-                        <div class="ms-4">
-                            <h2 class="mb-1">{{ user.username }}</h2>
-                            <p class="text-muted mb-0">
-                                {% if 'ROLE_ADMIN' in user.roles %}
-                                    <span class="badge bg-danger">Administrateur</span>
-                                {% elseif 'ROLE_MOD' in user.roles %}
-                                    <span class="badge bg-warning">Modérateur</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Utilisateur</span>
-                                {% endif %}
-                                
-                                {% if user.is_banned %}
-                                    <span class="badge bg-dark">Banni</span>
-                                {% endif %}
-                            </p>
-                            <p class="mt-2">
-                                <strong>{{ publications|length }}</strong> publication(s)
-                            </p>
-                        </div>
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        {% if user.images is not empty %}
+                            <img src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                                 alt="{{ user.username }}" 
+                                 class="rounded-circle"
+                                 style="width: 100px; height: 100px; object-fit: cover;">
+                        {% else %}
+                            <i class="bi bi-person-circle text-success" style="font-size: 100px;"></i>
+                        {% endif %}
                     </div>
-                    
-                    {# Boutons de modération #}
-                    {% if app.session.get('user') and (('ROLE_MOD' in app.session.get('user').roles) or ('ROLE_ADMIN' in app.session.get('user').roles)) %}
-                        <div>
-                            {% if user.is_banned %}
-                                <form method="post" action="{{ path('app_user_deban', {id: user.id}) }}" class="d-inline">
-                                    <button type="submit" class="btn btn-success">
-                                        <i class="bi bi-unlock"></i> Débannir
-                                    </button>
-                                </form>
-                            {% else %}
-                                {% if app.session.get('user').username != user.username %}
-                                    <form method="post" action="{{ path('app_user_ban', {id: user.id}) }}" class="d-inline">
-                                        <button type="submit" class="btn btn-danger" 
-                                                onclick="return confirm('Êtes-vous sûr de vouloir bannir cet utilisateur ?')">
-                                            <i class="bi bi-lock"></i> Bannir
-                                        </button>
-                                    </form>
-                                {% endif %}
+                    <div class="col">
+                        <h2 class="mb-2">
+                            {{ user.username }}
+                            {% if 'ROLE_ADMIN' in user.roles %}
+                                <span class="badge bg-danger ms-2">Admin</span>
+                            {% elseif 'ROLE_MOD' in user.roles %}
+                                <span class="badge bg-warning ms-2">Modérateur</span>
                             {% endif %}
+                            {% if is_banned(user) %}
+                                <span class="badge bg-dark ms-2">
+                                    <i class="bi bi-ban"></i> Banni
+                                </span>
+                            {% endif %}
+                        </h2>
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-calendar"></i> 
+                            Membre depuis {{ user.created_at|default('now')|date('F Y') }}
+                        </p>
+                        <p class="text-muted">
+                            <i class="bi bi-file-earmark-text"></i> 
+                            {{ user.publications|length }} publication(s)
+                        </p>
+                    </div>
+                    {% if app.session.get('user') and app.session.get('user').username == user.username %}
+                        <div class="col-auto">
+                            <a href="{{ path('app_profile_edit') }}" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i> Modifier le profil
+                            </a>
                         </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<h3 class="mb-4">Publications de {{ user.username }}</h3>
-
-{% if publications is empty %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Cet utilisateur n'a pas encore de publications.
-    </div>
-{% else %}
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        {% for publication in publications %}
-            <div class="col">
-                <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="text-decoration-none">
-                    <div class="card h-100 shadow-sm">
-                        {% if publication.images is not empty %}
-                            {% if publication.images|length == 1 %}
-                                {# Une seule image : affichage simple #}
+        {# Publications de l'utilisateur #}
+        <h3 class="mb-3">Publications</h3>
+        
+        {% if user.publications is not empty %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for publication in user.publications %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm">
+                            {% if publication.images is not empty %}
                                 <img src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
                                      class="card-img-top" 
                                      alt="{{ publication.description }}"
-                                     style="height: 250px; object-fit: cover;">
-                            {% else %}
-                                {# Plusieurs images : carousel #}
-                                <div id="carousel-{{ publication.id }}" class="carousel slide" data-bs-ride="false">
-                                    <div class="carousel-inner">
-                                        {% for image in publication.images %}
-                                            <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                                <img src="https://127.0.0.1:3000{{ image.url }}" 
-                                                     class="d-block w-100" 
-                                                     alt="{{ publication.description }}"
-                                                     style="height: 250px; object-fit: cover;">
-                                            </div>
-                                        {% endfor %}
-                                    </div>
-                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ publication.id }}" data-bs-slide="prev">
-                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    </button>
-                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ publication.id }}" data-bs-slide="next">
-                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    </button>
-                                    <div class="carousel-indicators">
-                                        {% for image in publication.images %}
-                                            <button type="button" data-bs-target="#carousel-{{ publication.id }}" 
-                                                    data-bs-slide-to="{{ loop.index0 }}" 
-                                                    {% if loop.first %}class="active"{% endif %}></button>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+                                     style="height: 200px; object-fit: cover;">
                             {% endif %}
-                        {% else %}
-                            <div class="bg-light d-flex align-items-center justify-content-center" 
-                                 style="height: 250px;">
-                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            <div class="card-body">
+                                <p class="card-text">{{ publication.description|slice(0, 100) }}{% if publication.description|length > 100 %}...{% endif %}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="bi bi-heart"></i> {{ publication.likes|length }}
+                                        <i class="bi bi-chat ms-2"></i> {{ publication.comments|length }}
+                                    </small>
+                                    <a href="{{ path('app_publication_view', {id: publication.id}) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        Voir
+                                    </a>
+                                </div>
                             </div>
-                        {% endif %}
-                        
-                        <div class="card-body">
-                            <p class="card-text">{{ publication.description }}</p>
-                        </div>
-                        
-                        <div class="card-footer bg-transparent">
-                            <small class="text-muted">
-                                <i class="bi bi-heart"></i> {{ publication.likes|length }}
-                                <i class="bi bi-chat ms-2"></i> {{ publication.comments|length }}
-                            </small>
+                            <div class="card-footer text-muted">
+                                <small>{{ publication.created_at|date('d/m/Y à H:i') }}</small>
+                            </div>
                         </div>
                     </div>
-                </a>
+                {% endfor %}
             </div>
-        {% endfor %}
+        {% else %}
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> Aucune publication pour le moment.
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{{ path('app_home') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour à l'accueil
+            </a>
+        </div>
     </div>
-{% endif %}
+</div>
 {% endblock %}
