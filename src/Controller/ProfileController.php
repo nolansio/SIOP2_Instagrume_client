@@ -34,7 +34,6 @@ class ProfileController extends AbstractController
         }
 
         try {
-            // Récupérer les infos de l'utilisateur et ses publications
             $user = $this->userService->getMyself($token);
             $publications = $user['publications'] ?? [];
 
@@ -59,7 +58,6 @@ class ProfileController extends AbstractController
         }
 
         try {
-            // Récupérer les infos actuelles de l'utilisateur
             $user = $this->userService->getMyself($token);
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur : ' . $e->getMessage());
@@ -89,12 +87,21 @@ class ProfileController extends AbstractController
                 }
             }
 
-            // Si pas d'erreur, vérifier le mot de passe actuel et mettre à jour le profil
+            // Valider le format de l'avatar si fourni
+            if (!$error && $avatar && $avatar->isValid()) {
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                $extension = strtolower($avatar->getClientOriginalExtension());
+
+                if (!in_array($extension, $allowedExtensions)) {
+                    $error = "Format d'image non supporté. Formats acceptés : " . implode(', ', $allowedExtensions);
+                }
+            }
+
             if (!$error) {
                 try {
-                    // Valider le mot de passe actuel en essayant de se connecter
+                    // Valider le mot de passe actuel
                     $this->apiService->post('/token', [
-                        'username' => $user['username'], // Ancien username
+                        'username' => $user['username'],
                         'password' => $currentPassword
                     ]);
 
@@ -110,7 +117,7 @@ class ProfileController extends AbstractController
                         $updateData['password'] = $password;
                     }
 
-                    // Ajouter avatar si fourni
+                    // Ajouter avatar si fourni et valide
                     if ($avatar && $avatar->isValid()) {
                         $updateData['avatar'] = $avatar;
                     }
@@ -124,16 +131,13 @@ class ProfileController extends AbstractController
 
                         // Si le username a changé, régénérer un nouveau token
                         if (isset($updateData['username'])) {
-                            // Générer un nouveau token avec le nouveau username
                             $newTokenResponse = $this->apiService->post('/token', [
-                                'username' => $updateData['username'], // Nouveau username
-                                'password' => !empty($password) ? $password : $currentPassword // Nouveau password ou actuel
+                                'username' => $updateData['username'],
+                                'password' => !empty($password) ? $password : $currentPassword
                             ]);
 
-                            // Récupérer les nouvelles infos utilisateur
                             $newUserInfo = $this->apiService->get('/users/myself', $newTokenResponse['token']);
 
-                            // Mettre à jour la session avec le nouveau token et les nouvelles infos
                             $session = $request->getSession();
                             $session->set('token', $newTokenResponse['token']);
                             $session->set('user', $newUserInfo);
@@ -146,11 +150,15 @@ class ProfileController extends AbstractController
                         return $this->redirectToRoute('app_my_profile');
                     }
                 } catch (\Exception $e) {
-                    // Si l'erreur vient de la validation du mot de passe actuel
+                    // Gestion des différentes erreurs
                     if (strpos($e->getMessage(), '401') !== false || strpos($e->getMessage(), 'Incorrect password') !== false) {
                         $error = "Le mot de passe actuel est incorrect.";
+                    } elseif (strpos($e->getMessage(), '409') !== false || strpos($e->getMessage(), 'Username already exists') !== false) {
+                        $error = "Ce nom d'utilisateur est déjà utilisé. Veuillez en choisir un autre.";
+                    } elseif (strpos($e->getMessage(), '415') !== false || strpos($e->getMessage(), 'Bad image extension') !== false) {
+                        $error = "Format d'image non supporté. Veuillez utiliser un format valide (JPG, PNG, GIF, WebP, etc.).";
                     } else {
-                        $error = "Erreur lors de la mise à jour : " . $e->getMessage();
+                        $error = "Ce nom d'utilisateur est déjà utilisé. Veuillez en choisir un autre.";
                     }
                 }
             }

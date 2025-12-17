@@ -16,9 +16,7 @@ class LikeService
      */
     public function likePublication(int $publicationId, string $token): array
     {
-        return $this->apiService->post('/likes/publication', [
-            'publication_id' => $publicationId
-        ], $token);
+        return $this->apiService->post('/likes/publication/id/' . $publicationId, [], $token);
     }
 
     /**
@@ -26,9 +24,7 @@ class LikeService
      */
     public function dislikePublication(int $publicationId, string $token): array
     {
-        return $this->apiService->post('/dislike/publication', [
-            'publication_id' => $publicationId
-        ], $token);
+        return $this->apiService->post('/dislikes/publication/id/' . $publicationId, [], $token);
     }
 
     /**

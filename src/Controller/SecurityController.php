@@ -39,7 +39,7 @@ class SecurityController extends AbstractController
                 $error = "Le mot de passe doit contenir au moins 6 caractères.";
             } else {
                 try {
-                    // Appel à l'API pour créer l'utilisateur (sans email)
+                    // Appel à l'API pour créer l'utilisateur
                     $response = $this->apiService->post('/users', [
                         'username' => $username,
                         'password' => $password
@@ -49,7 +49,12 @@ class SecurityController extends AbstractController
                     $this->addFlash('success', 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.');
                     return $this->redirectToRoute('app_login');
                 } catch (\Exception $e) {
-                    $error = "Erreur lors de l'inscription : " . $e->getMessage();
+                    // Gérer spécifiquement l'erreur 409 (nom d'utilisateur déjà utilisé)
+                    if (strpos($e->getMessage(), '409') !== false || strpos($e->getMessage(), 'Username already exists') !== false) {
+                        $error = "Ce nom d'utilisateur est déjà utilisé. Veuillez en choisir un autre.";
+                    } else {
+                        $error = "Erreur lors de l'inscription. Veuillez réessayer.";
+                    }
                 }
             }
         }
@@ -80,11 +85,11 @@ class SecurityController extends AbstractController
                     'password' => $password
                 ]);
 
-                // IMPORTANT : Récupérer les infos utilisateur AVANT de stocker en session
+                // Récupérer les infos utilisateur
                 $token = $response['token'];
                 $userInfo = $this->apiService->get('/users/myself', $token);
 
-                // Stocker le token et les infos utilisateur en session SEULEMENT si tout a réussi
+                // Stocker le token et les infos utilisateur en session
                 $session = $request->getSession();
                 $session->set('token', $token);
                 $session->set('user', $userInfo);
@@ -109,17 +114,10 @@ class SecurityController extends AbstractController
     #[Route('/deconnexion', name: 'app_logout')]
     public function logout(Request $request): Response
     {
-        // Récupérer la session
         $session = $request->getSession();
-
-        // Supprimer explicitement les données
         $session->remove('token');
         $session->remove('user');
-
-        // Vider complètement la session
         $session->clear();
-
-        // Invalider la session
         $session->invalidate();
 
         $this->addFlash('success', 'Vous êtes déconnecté.');

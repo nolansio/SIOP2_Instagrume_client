@@ -55,19 +55,34 @@ class PublicationController extends AbstractController
             if (empty($description) && empty($images)) {
                 $error = "Vous devez fournir au moins une description ou une image.";
             } else {
-                try {
-                    // Préparer les données pour l'API
-                    $formData = [
-                        'description' => $description
-                    ];
+                // Valider les extensions des images
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                $invalidImages = [];
 
-                    // Appel API avec multipart/form-data pour l'upload d'images
-                    $response = $this->apiService->postMultipart('/publications', $formData, $images, $token);
+                foreach ($images as $image) {
+                    $extension = strtolower($image->getClientOriginalExtension());
+                    if (!in_array($extension, $allowedExtensions)) {
+                        $invalidImages[] = $image->getClientOriginalName();
+                    }
+                }
 
-                    $this->addFlash('success', 'Publication créée avec succès !');
-                    return $this->redirectToRoute('app_home');
-                } catch (\Exception $e) {
-                    $error = "Erreur lors de la création : " . $e->getMessage();
+                if (!empty($invalidImages)) {
+                    $error = "Format(s) d'image non supporté(s) : " . implode(', ', $invalidImages) . ". Formats acceptés : " . implode(', ', $allowedExtensions);
+                } else {
+                    try {
+                        // Préparer les données pour l'API
+                        $formData = [
+                            'description' => $description
+                        ];
+
+                        // Appel API avec multipart/form-data pour l'upload d'images
+                        $response = $this->apiService->postMultipart('/publications', $formData, $images, $token);
+
+                        $this->addFlash('success', 'Publication créée avec succès !');
+                        return $this->redirectToRoute('app_home');
+                    } catch (\Exception $e) {
+                        $error = "Erreur lors de la création de la publication. Veuillez réessayer.";
+                    }
                 }
             }
         }
@@ -133,6 +148,6 @@ class PublicationController extends AbstractController
             $this->addFlash('danger', 'Erreur lors de la suppression.');
         }
 
-        return $this->redirectToRoute('app_home');
+        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_home'));
     }
 }

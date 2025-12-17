@@ -57,21 +57,6 @@
                             <small class="text-muted">{{ publication.created_at|date('d/m/Y à H:i') }}</small>
                         </div>
                     </div>
-                    
-                    {# Boutons modifier/supprimer #}
-                    {% if app.session.get('user') and app.session.get('user').username == publication.user.username %}
-                        <div>
-                            <a href="{{ path('app_publication_edit', {id: publication.id}) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-pencil"></i> Modifier
-                            </a>
-                            <form method="post" action="{{ path('app_publication_delete', {id: publication.id}) }}" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')">
-                                    <i class="bi bi-trash"></i> Supprimer
-                                </button>
-                            </form>
-                        </div>
-                    {% endif %}
                 </div>
 
                 {# Description #}
