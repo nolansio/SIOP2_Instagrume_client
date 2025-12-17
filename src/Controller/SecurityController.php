@@ -102,7 +102,32 @@ class SecurityController extends AbstractController
                 $session->remove('token');
                 $session->remove('user');
 
-                $error = "Identifiants incorrects.";
+                // Détecter le type d'erreur
+                $errorMessage = $e->getMessage();
+
+                // Cas 1 : Utilisateur banni (403)
+                if (strpos($errorMessage, '403') !== false || strpos($errorMessage, 'User is banned') !== false) {
+                    // Récupérer les informations de l'utilisateur pour avoir la date de bannissement
+                    try {
+                        // On ne peut pas récupérer les infos sans token, donc on affiche un message générique
+                        // Vous pouvez créer un endpoint spécial dans l'API qui renvoie la date de fin du ban
+                        $error = "Votre compte est temporairement banni. Veuillez contacter un administrateur.";
+                    } catch (\Exception $e2) {
+                        $error = "Votre compte est temporairement banni. Veuillez contacter un administrateur.";
+                    }
+                }
+                // Cas 2 : Utilisateur introuvable (404)
+                elseif (strpos($errorMessage, '404') !== false || strpos($errorMessage, 'User not found') !== false) {
+                    $error = "Utilisateur introuvable. Vérifiez votre nom d'utilisateur.";
+                }
+                // Cas 3 : Mot de passe incorrect (401)
+                elseif (strpos($errorMessage, '401') !== false || strpos($errorMessage, 'Incorrect password') !== false) {
+                    $error = "Mot de passe incorrect.";
+                }
+                // Cas 4 : Erreur générique
+                else {
+                    $error = "Identifiants incorrects.";
+                }
             }
         }
 
