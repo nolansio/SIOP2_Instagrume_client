@@ -17,7 +17,7 @@ class ModerationController extends AbstractController
         $this->moderationService = $moderationService;
     }
 
-    #[Route('/moderation/user/{id}/ban', name: 'app_user_ban', methods: ['POST'])]
+    #[Route('/moderation/user/{id}/ban', name: 'app_moderation_ban', methods: ['POST'])]
     public function banUser(int $id, Request $request): Response
     {
         $token = $request->getSession()->get('token');
@@ -27,16 +27,18 @@ class ModerationController extends AbstractController
         }
 
         try {
-            $this->moderationService->banUser($id, $token);
+            // Par défaut, bannir pour 7 jours
+            $banDurationDays = $request->request->get('ban_duration', 7);
+            $this->moderationService->banUser($id, $banDurationDays, $token);
             $this->addFlash('success', 'Utilisateur banni avec succès.');
         } catch (\Exception $e) {
             $this->addFlash('danger', 'Erreur : ' . $e->getMessage());
         }
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_home'));
+        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_dashboard'));
     }
 
-    #[Route('/moderation/user/{id}/deban', name: 'app_user_deban', methods: ['POST'])]
+    #[Route('/moderation/user/{id}/deban', name: 'app_moderation_unban', methods: ['POST'])]
     public function debanUser(int $id, Request $request): Response
     {
         $token = $request->getSession()->get('token');
@@ -52,7 +54,7 @@ class ModerationController extends AbstractController
             $this->addFlash('danger', 'Erreur : ' . $e->getMessage());
         }
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_home'));
+        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_dashboard'));
     }
 
     #[Route('/moderation/publication/{id}/lock', name: 'app_publication_lock', methods: ['POST'])]
@@ -71,7 +73,7 @@ class ModerationController extends AbstractController
             $this->addFlash('danger', 'Erreur : ' . $e->getMessage());
         }
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_home'));
+        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_dashboard'));
     }
 
     #[Route('/moderation/publication/{id}/unlock', name: 'app_publication_unlock', methods: ['POST'])]
@@ -90,6 +92,6 @@ class ModerationController extends AbstractController
             $this->addFlash('danger', 'Erreur : ' . $e->getMessage());
         }
 
-        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_home'));
+        return $this->redirect($request->headers->get('referer') ?? $this->generateUrl('app_dashboard'));
     }
 }
