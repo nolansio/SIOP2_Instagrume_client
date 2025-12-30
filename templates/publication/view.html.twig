@@ -84,19 +84,28 @@
                             {% endif %}
                         {% endfor %}
 
-                        {# Bouton Like #}
-                        <form method="post" action="{% if userLiked %}{{ path('app_like_delete', {id: userLikeId}) }}{% else %}{{ path('app_publication_like', {id: publication.id}) }}{% endif %}" class="d-inline">
-                            <button type="submit" class="btn btn-sm {% if userLiked %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                                <i class="bi bi-heart{% if userLiked %}-fill{% endif %}"></i> {{ publication.likes|length }}
-                            </button>
-                        </form>
+                        {# ✅ CORRECTION : Masquer les boutons si c'est SA publication #}
+                        {% if currentUser.id != publication.user.id %}
+                            {# Bouton Like #}
+                            <form method="post" action="{% if userLiked %}{{ path('app_like_delete', {id: userLikeId}) }}{% else %}{{ path('app_publication_like', {id: publication.id}) }}{% endif %}" class="d-inline">
+                                <button type="submit" class="btn btn-sm {% if userLiked %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                    <i class="bi bi-heart{% if userLiked %}-fill{% endif %}"></i> {{ publication.likes|length }}
+                                </button>
+                            </form>
 
-                        {# Bouton Dislike #}
-                        <form method="post" action="{% if userDisliked %}{{ path('app_dislike_delete', {id: userDislikeId}) }}{% else %}{{ path('app_publication_dislike', {id: publication.id}) }}{% endif %}" class="d-inline">
-                            <button type="submit" class="btn btn-sm {% if userDisliked %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                                <i class="bi bi-hand-thumbs-down{% if userDisliked %}-fill{% endif %}"></i> {{ publication.dislikes|length }}
-                            </button>
-                        </form>
+                            {# Bouton Dislike #}
+                            <form method="post" action="{% if userDisliked %}{{ path('app_dislike_delete', {id: userDislikeId}) }}{% else %}{{ path('app_publication_dislike', {id: publication.id}) }}{% endif %}" class="d-inline">
+                                <button type="submit" class="btn btn-sm {% if userDisliked %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    <i class="bi bi-hand-thumbs-down{% if userDisliked %}-fill{% endif %}"></i> {{ publication.dislikes|length }}
+                                </button>
+                            </form>
+                        {% else %}
+                            {# C'est sa propre publication, afficher seulement les compteurs #}
+                            <span class="text-muted">
+                                <i class="bi bi-heart"></i> {{ publication.likes|length }}
+                                <i class="bi bi-hand-thumbs-down ms-3"></i> {{ publication.dislikes|length }}
+                            </span>
+                        {% endif %}
                     {% else %}
                         <span class="text-muted">
                             <i class="bi bi-heart"></i> {{ publication.likes|length }}
@@ -180,21 +189,30 @@
                                                     {% endif %}
                                                 {% endfor %}
 
-                                                <div class="d-inline-block ms-2">
-                                                    {# Bouton Like commentaire #}
-                                                    <form method="post" action="{% if commentUserLiked %}{{ path('app_comment_like_delete', {id: commentUserLikeId}) }}{% else %}{{ path('app_comment_like', {id: comment.id}) }}{% endif %}" class="d-inline">
-                                                        <button type="submit" class="btn btn-link btn-sm p-0 {% if commentUserLiked %}text-danger{% else %}text-muted{% endif %}">
-                                                            <i class="bi bi-heart{% if commentUserLiked %}-fill{% endif %}"></i> {{ comment.likes|length }}
-                                                        </button>
-                                                    </form>
+                                                {# ✅ CORRECTION : Masquer les boutons si c'est SON commentaire #}
+                                                {% if currentUser.id != comment.user.id %}
+                                                    <div class="d-inline-block ms-2">
+                                                        {# Bouton Like commentaire #}
+                                                        <form method="post" action="{% if commentUserLiked %}{{ path('app_comment_like_delete', {id: commentUserLikeId}) }}{% else %}{{ path('app_comment_like', {id: comment.id}) }}{% endif %}" class="d-inline">
+                                                            <button type="submit" class="btn btn-link btn-sm p-0 {% if commentUserLiked %}text-danger{% else %}text-muted{% endif %}">
+                                                                <i class="bi bi-heart{% if commentUserLiked %}-fill{% endif %}"></i> {{ comment.likes|length }}
+                                                            </button>
+                                                        </form>
 
-                                                    {# Bouton Dislike commentaire #}
-                                                    <form method="post" action="{% if commentUserDisliked %}{{ path('app_comment_dislike_delete', {id: commentUserDislikeId}) }}{% else %}{{ path('app_comment_dislike', {id: comment.id}) }}{% endif %}" class="d-inline ms-2">
-                                                        <button type="submit" class="btn btn-link btn-sm p-0 {% if commentUserDisliked %}text-primary{% else %}text-muted{% endif %}">
-                                                            <i class="bi bi-hand-thumbs-down{% if commentUserDisliked %}-fill{% endif %}"></i> {{ comment.dislikes|length }}
-                                                        </button>
-                                                    </form>
-                                                </div>
+                                                        {# Bouton Dislike commentaire #}
+                                                        <form method="post" action="{% if commentUserDisliked %}{{ path('app_comment_dislike_delete', {id: commentUserDislikeId}) }}{% else %}{{ path('app_comment_dislike', {id: comment.id}) }}{% endif %}" class="d-inline ms-2">
+                                                            <button type="submit" class="btn btn-link btn-sm p-0 {% if commentUserDisliked %}text-primary{% else %}text-muted{% endif %}">
+                                                                <i class="bi bi-hand-thumbs-down{% if commentUserDisliked %}-fill{% endif %}"></i> {{ comment.dislikes|length }}
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                {% else %}
+                                                    {# C'est son propre commentaire, afficher seulement les compteurs #}
+                                                    <small class="text-muted ms-2">
+                                                        <i class="bi bi-heart"></i> {{ comment.likes|length }}
+                                                        <i class="bi bi-hand-thumbs-down ms-2"></i> {{ comment.dislikes|length }}
+                                                    </small>
+                                                {% endif %}
 
                                                 {# Répondre #}
                                                 {% if not publication.is_locked %}
@@ -303,21 +321,30 @@
                                                             {% endif %}
                                                         {% endfor %}
 
-                                                        <div class="d-inline-block ms-2">
-                                                            {# Bouton Like réponse #}
-                                                            <form method="post" action="{% if replyUserLiked %}{{ path('app_comment_like_delete', {id: replyUserLikeId}) }}{% else %}{{ path('app_comment_like', {id: reply.id}) }}{% endif %}" class="d-inline">
-                                                                <button type="submit" class="btn btn-link btn-sm p-0 {% if replyUserLiked %}text-danger{% else %}text-muted{% endif %}">
-                                                                    <i class="bi bi-heart{% if replyUserLiked %}-fill{% endif %}"></i> {{ reply.likes|length }}
-                                                                </button>
-                                                            </form>
+                                                        {# ✅ CORRECTION : Masquer les boutons si c'est SA réponse #}
+                                                        {% if currentUser.id != reply.user.id %}
+                                                            <div class="d-inline-block ms-2">
+                                                                {# Bouton Like réponse #}
+                                                                <form method="post" action="{% if replyUserLiked %}{{ path('app_comment_like_delete', {id: replyUserLikeId}) }}{% else %}{{ path('app_comment_like', {id: reply.id}) }}{% endif %}" class="d-inline">
+                                                                    <button type="submit" class="btn btn-link btn-sm p-0 {% if replyUserLiked %}text-danger{% else %}text-muted{% endif %}">
+                                                                        <i class="bi bi-heart{% if replyUserLiked %}-fill{% endif %}"></i> {{ reply.likes|length }}
+                                                                    </button>
+                                                                </form>
 
-                                                            {# Bouton Dislike réponse #}
-                                                            <form method="post" action="{% if replyUserDisliked %}{{ path('app_comment_dislike_delete', {id: replyUserDislikeId}) }}{% else %}{{ path('app_comment_dislike', {id: reply.id}) }}{% endif %}" class="d-inline ms-2">
-                                                                <button type="submit" class="btn btn-link btn-sm p-0 {% if replyUserDisliked %}text-primary{% else %}text-muted{% endif %}">
-                                                                    <i class="bi bi-hand-thumbs-down{% if replyUserDisliked %}-fill{% endif %}"></i> {{ reply.dislikes|length }}
-                                                                </button>
-                                                            </form>
-                                                        </div>
+                                                                {# Bouton Dislike réponse #}
+                                                                <form method="post" action="{% if replyUserDisliked %}{{ path('app_comment_dislike_delete', {id: replyUserDislikeId}) }}{% else %}{{ path('app_comment_dislike', {id: reply.id}) }}{% endif %}" class="d-inline ms-2">
+                                                                    <button type="submit" class="btn btn-link btn-sm p-0 {% if replyUserDisliked %}text-primary{% else %}text-muted{% endif %}">
+                                                                        <i class="bi bi-hand-thumbs-down{% if replyUserDisliked %}-fill{% endif %}"></i> {{ reply.dislikes|length }}
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        {% else %}
+                                                            {# C'est sa propre réponse, afficher seulement les compteurs #}
+                                                            <small class="text-muted ms-2">
+                                                                <i class="bi bi-heart"></i> {{ reply.likes|length }}
+                                                                <i class="bi bi-hand-thumbs-down ms-2"></i> {{ reply.dislikes|length }}
+                                                            </small>
+                                                        {% endif %}
 
                                                         {# Éditer/Supprimer #}
                                                         {% if app.session.get('user').username == reply.user.username %}
