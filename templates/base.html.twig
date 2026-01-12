@@ -22,7 +22,7 @@
         <div class="container navbar-container">
             {# Logo / Brand #}
             <a href="{{ path('app_home') }}" class="navbar-brand">
-                <img src="{{ asset('images/logo.png') }}" alt="Instagrume Logo" style="height: 40px; width: auto; margin-right: 0.5rem; vertical-align: middle;">
+                <img src="{{ asset('images/logo.png') }}" alt="Instagrume Logo" style="height: 40px; width: auto; vertical-align: middle;">
                 <span>Instagrume</span>
             </a>
             
@@ -48,7 +48,6 @@
                     {# Bouton créer une publication #}
                     <li>
                         <a href="{{ path('app_publication_create') }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle"></i>
                             <span>Créer</span>
                         </a>
                     </li>
@@ -57,7 +56,6 @@
                     {% if app.session.get('user') and (('ROLE_MOD' in app.session.get('user').roles) or ('ROLE_ADMIN' in app.session.get('user').roles)) %}
                         <li>
                             <a href="{{ path('app_dashboard') }}">
-                                <i class="bi bi-speedometer2"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
@@ -66,15 +64,24 @@
                     {# Accueil #}
                     <li>
                         <a href="{{ path('app_home') }}">
-                            <i class="bi bi-house"></i>
                             <span>Accueil</span>
                         </a>
                     </li>
                     
-                    {# Profil #}
+                    {# Profil avec avatar #}
                     <li>
-                        <a href="{{ path('app_my_profile') }}">
-                            <i class="bi bi-person-circle"></i>
+                        <a href="{{ path('app_my_profile') }}" style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            {# Avatar ou icône par défaut #}
+                            {% if app.session.get('user') and app.session.get('user').images is not empty %}
+                                <img 
+                                    src="https://127.0.0.1:3000{{ app.session.get('user').images[0].url }}" 
+                                    alt="{{ app.session.get('user').username }}"
+                                    style="width: 32px; height: 32px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary);"
+                                >
+                            {% else %}
+                                <i class="bi bi-person-circle"></i>
+                            {% endif %}
+                            
                             <span>
                                 {% if app.session.get('user') %}
                                     {{ app.session.get('user').username }}
@@ -87,12 +94,12 @@
                     
                     {# Déconnexion #}
                     <li>
-                        <a href="{{ path('app_logout') }}">
+                        <a href="{{ path('app_logout') }}" class="btn btn-outline">
                             <i class="bi bi-box-arrow-right"></i>
                         </a>
                     </li>
                 {% else %}
-                    {# Utilisateur non connecté #}
+                    {# Connexion / Inscription #}
                     <li>
                         <a href="{{ path('app_login') }}">
                             <i class="bi bi-box-arrow-in-right"></i>
@@ -109,7 +116,7 @@
             </ul>
         </div>
     </nav>
-
+    
     {# Messages flash #}
     {% for label, messages in app.flashes %}
         {% for message in messages %}
@@ -126,7 +133,21 @@
     <main class="container" style="margin-top: var(--spacing-2xl); margin-bottom: var(--spacing-3xl);">
         {% block body %}{% endblock %}
     </main>
-
+    
+    {# Footer minimaliste #}
+    <footer style="background: var(--color-surface); border-top: 1px solid var(--color-border); padding: var(--spacing-xl) 0; margin-top: auto;">
+        <div class="container">
+            <div style="text-align: center; color: var(--color-text-muted);">
+                <p style="margin-bottom: var(--spacing-sm);">
+                    <strong style="color: var(--color-primary);">Instagrume</strong> - Partagez vos fruits et légumes
+                </p>
+                <p style="font-size: var(--font-size-sm);">
+                    © {{ "now"|date("Y") }} Instagrume. Tous droits réservés.
+                </p>
+            </div>
+        </div>
+    </footer>
+    
     {% block javascripts %}{% endblock %}
 </body>
 </html>

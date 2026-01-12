@@ -29,7 +29,19 @@ class SearchController extends AbstractController
 
         if ($query) {
             try {
-                $users = $this->userService->searchUsers($query, $token);
+                // Récupérer les usernames correspondants
+                $usernames = $this->userService->searchUsers($query, $token);
+
+                // Récupérer les détails complets de chaque utilisateur (avec avatar)
+                foreach ($usernames as $username) {
+                    try {
+                        $userDetails = $this->userService->getUserByUsername($username, $token);
+                        $users[] = $userDetails;
+                    } catch (\Exception $e) {
+                        // Ignorer les erreurs pour des utilisateurs individuels
+                        continue;
+                    }
+                }
             } catch (\Exception $e) {
                 $this->addFlash('danger', 'Erreur lors de la recherche.');
             }
