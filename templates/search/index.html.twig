@@ -3,35 +3,73 @@
 {% block title %}Recherche - Instagrume{% endblock %}
 
 {% block body %}
-<h2 class="mb-4">
-    <i class="bi bi-search"></i> Recherche d'utilisateurs
-</h2>
+<div style="max-width: 800px; margin: 0 auto;">
+    {# En-tête #}
+    <div style="margin-bottom: var(--spacing-2xl);">
+        <h1 style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+            <i class="bi bi-search" style="color: var(--color-primary);"></i>
+            <span>Recherche d'utilisateurs</span>
+        </h1>
+        {% if query %}
+            <p class="text-muted">
+                Résultats pour : <strong style="color: var(--color-primary);">{{ query }}</strong>
+            </p>
+        {% endif %}
+    </div>
 
-{% if query %}
-    <p class="text-muted">Résultats pour : <strong>{{ query }}</strong></p>
-    
-    {% if users is empty %}
-        <div class="alert alert-warning">
-            <i class="bi bi-exclamation-triangle"></i> Aucun utilisateur trouvé.
-        </div>
-    {% else %}
-        <div class="list-group">
-            {% for username in users %}
-                <a href="{{ path('app_user_profile', {username: username}) }}" 
-                class="list-group-item list-group-item-action">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-person-circle fs-3 me-3 text-success"></i>
-                        <div>
-                            <h5 class="mb-1">{{ username }}</h5>
+    {% if query %}
+        {% if users is empty %}
+            {# Aucun résultat #}
+            <div class="card">
+                <div class="card-body" style="text-align: center; padding: var(--spacing-3xl);">
+                    <i class="bi bi-search" style="font-size: 3rem; color: var(--color-text-muted); margin-bottom: var(--spacing-md);"></i>
+                    <h3 style="color: var(--color-text-secondary); margin-bottom: var(--spacing-sm);">Aucun utilisateur trouvé</h3>
+                    <p class="text-muted">
+                        Essayez avec un autre terme de recherche
+                    </p>
+                </div>
+            </div>
+        {% else %}
+            {# Liste des résultats #}
+            <div class="card">
+                {% for username in users %}
+                    <a 
+                        href="{{ path('app_user_profile', {username: username}) }}" 
+                        style="display: block; padding: var(--spacing-lg); text-decoration: none; color: inherit; transition: background-color var(--transition-fast); {% if not loop.last %}border-bottom: 1px solid var(--color-border-light);{% endif %}"
+                        onmouseover="this.style.backgroundColor='var(--color-surface-hover)'"
+                        onmouseout="this.style.backgroundColor='transparent'"
+                    >
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                            <div style="width: 48px; height: 48px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--amber-5), var(--amber-7)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <i class="bi bi-person" style="font-size: 1.5rem; color: white;"></i>
+                            </div>
+                            <div style="flex: 1; min-width: 0;">
+                                <h3 style="font-weight: 600; font-size: var(--font-size-lg); margin: 0; color: var(--color-text-primary);">
+                                    {{ username }}
+                                </h3>
+                            </div>
+                            <i class="bi bi-chevron-right" style="color: var(--color-text-muted);"></i>
                         </div>
-                    </div>
-                </a>
-            {% endfor %}
+                    </a>
+                {% endfor %}
+            </div>
+            
+            {# Nombre de résultats #}
+            <p class="text-muted" style="text-align: center; margin-top: var(--spacing-lg);">
+                {{ users|length }} utilisateur{% if users|length > 1 %}s{% endif %} trouvé{% if users|length > 1 %}s{% endif %}
+            </p>
+        {% endif %}
+    {% else %}
+        {# État initial sans recherche #}
+        <div class="card">
+            <div class="card-body" style="text-align: center; padding: var(--spacing-3xl);">
+                <i class="bi bi-people" style="font-size: 3rem; color: var(--color-primary); margin-bottom: var(--spacing-md);"></i>
+                <h3 style="margin-bottom: var(--spacing-sm);">Trouvez des utilisateurs</h3>
+                <p class="text-muted">
+                    Utilisez la barre de recherche pour trouver d'autres membres de la communauté Instagrume
+                </p>
+            </div>
         </div>
     {% endif %}
-{% else %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Utilisez la barre de recherche pour trouver des utilisateurs.
-    </div>
-{% endif %}
+</div>
 {% endblock %}

@@ -3,105 +3,188 @@
 {% block title %}Modifier mon profil - Instagrume{% endblock %}
 
 {% block body %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-body">
-                <h2 class="card-title mb-4">
-                    <i class="bi bi-pencil text-success"></i> Modifier mon profil
-                </h2>
+<div class="container" style="max-width: 800px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-md);">
+    {# En-tête #}
+    <div style="margin-bottom: var(--spacing-xl);">
+        <h1 style="font-size: var(--font-size-3xl); font-weight: 700; margin-bottom: var(--spacing-xs);">
+            <i class="bi bi-person-gear" style="color: var(--color-primary);"></i>
+            Modifier mon profil
+        </h1>
+        <p style="color: var(--color-text-muted);">Mettez à jour vos informations personnelles</p>
+    </div>
 
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
+    {# Erreur #}
+    {% if error %}
+        <div class="alert alert-error" style="margin-bottom: var(--spacing-lg);">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
 
-                <form method="post" enctype="multipart/form-data">
-                    {# Avatar actuel #}
-                    <div class="mb-4 text-center">
-                        {% if user.images is not empty %}
-                            <img src="https://127.0.0.1:3000{{ user.images[0].url }}" 
-                                 alt="Avatar" 
-                                 class="rounded-circle mb-3" 
-                                 style="width: 150px; height: 150px; object-fit: cover;">
-                        {% else %}
-                            <i class="bi bi-person-circle text-success mb-3" style="font-size: 10rem;"></i>
-                        {% endif %}
-                    </div>
+    {# Formulaire #}
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                
+                {# Avatar actuel #}
+                <div style="text-align: center; margin-bottom: var(--spacing-xl);">
+                    {% if user.images is defined and user.images is not empty %}
+                        <img 
+                            src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                            alt="{{ user.username }}"
+                            style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--color-primary);"
+                        >
+                    {% else %}
+                        <i class="bi bi-person-circle" style="font-size: 7.5rem; color: var(--color-primary);"></i>
+                    {% endif %}
+                    <p style="margin-top: var(--spacing-sm); color: var(--color-text-muted); font-size: var(--font-size-sm);">
+                        Avatar actuel
+                    </p>
+                </div>
 
-                    {# Nom d'utilisateur #}
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Nom d'utilisateur</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="username" 
-                               name="username" 
-                               value="{{ user.username }}"
-                               placeholder="Laisser vide pour ne pas modifier">
-                        <small class="form-text text-muted">Laisser vide pour ne pas modifier</small>
-                    </div>
+                {# Username #}
+                <div class="form-group">
+                    <label for="username" class="form-label">
+                        <i class="bi bi-person"></i> Nom d'utilisateur
+                    </label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="username" 
+                        name="username" 
+                        value="{{ user.username }}"
+                        placeholder="Votre nom d'utilisateur"
+                    >
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        Laissez vide pour ne pas modifier
+                    </small>
+                </div>
 
-                    {# Nouvel avatar #}
-                    <div class="mb-3">
-                        <label for="avatar" class="form-label">Changer l'avatar</label>
-                        <input type="file" 
-                               class="form-control" 
-                               id="avatar" 
-                               name="avatar" 
-                               accept="image/*">
-                        <small class="form-text text-muted">Formats acceptés : JPG, PNG, GIF, WebP...</small>
-                    </div>
+                <hr style="border-top: 1px solid var(--color-border-light); margin: var(--spacing-xl) 0;">
 
-                    <hr class="my-4">
+                <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-md);">
+                    Changer le mot de passe
+                </h3>
+                <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--spacing-lg);">
+                    Laissez vide si vous ne souhaitez pas changer votre mot de passe
+                </p>
 
-                    {# Mot de passe actuel - Obligatoire #}
-                    <h5 class="mb-3">Confirmer votre identité</h5>
+                {# Nouveau mot de passe #}
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="bi bi-key"></i> Nouveau mot de passe
+                    </label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Nouveau mot de passe (optionnel)"
+                        minlength="6"
+                    >
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        Au moins 6 caractères
+                    </small>
+                </div>
+
+                {# Confirmation mot de passe #}
+                <div class="form-group">
+                    <label for="confirm_password" class="form-label">
+                        <i class="bi bi-key-fill"></i> Confirmer le nouveau mot de passe
+                    </label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="confirm_password" 
+                        name="confirm_password" 
+                        placeholder="Confirmez le nouveau mot de passe"
+                    >
+                </div>
+
+                <hr style="border-top: 1px solid var(--color-border-light); margin: var(--spacing-xl) 0;">
+
+                {# Avatar #}
+                <div class="form-group">
+                    <label for="avatar" class="form-label">
+                        <i class="bi bi-image"></i> Changer l'avatar
+                    </label>
+                    <input 
+                        type="file" 
+                        class="form-input" 
+                        id="avatar" 
+                        name="avatar" 
+                        accept="image/*"
+                        onchange="previewAvatar(event)"
+                    >
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        Formats acceptés : JPG, PNG, GIF, WebP
+                    </small>
                     
-                    <div class="mb-3">
+                    {# Preview #}
+                    <div id="avatar-preview" style="display: none; margin-top: var(--spacing-md); text-align: center;">
+                        <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--spacing-sm);">
+                            Aperçu :
+                        </p>
+                        <img 
+                            id="avatar-preview-img" 
+                            style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--color-primary);"
+                            alt="Aperçu"
+                        >
+                    </div>
+
+                    <hr style="border-top: 1px solid var(--color-border-light); margin: var(--spacing-xl) 0;">
+
+                    <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-md);">
+                        Confirmer les modifications avec votre mot de passe actuel 
+                    </h3>
+
+                    {# Mot de passe actuel (obligatoire) #}
+                    <div class="form-group">
                         <label for="current_password" class="form-label">
-                            Mot de passe actuel <span class="text-danger">*</span>
+                            <i class="bi bi-shield-lock"></i> Mot de passe actuel *
                         </label>
-                        <input type="password" 
-                               class="form-control" 
-                               id="current_password" 
-                               name="current_password"
-                               required>
-                        <small class="form-text text-muted">Requis pour confirmer vos modifications</small>
+                        <input 
+                            type="password" 
+                            class="form-input" 
+                            id="current_password" 
+                            name="current_password" 
+                            required
+                            placeholder="Votre mot de passe actuel"
+                        >
+                        <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                            <i class="bi bi-info-circle"></i> Requis pour confirmer les modifications
+                        </small>
                     </div>
+                </div>
 
-                    <hr class="my-4">
+                {# Boutons #}
+                <div style="margin-top: var(--spacing-xl);">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Enregistrer les modifications</span>
+                    </button>
+                    <a href="{{ path('app_my_profile') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        <span>Annuler</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-                    {# Changer le mot de passe #}
-                    <h5 class="mb-3">Changer le mot de passe (optionnel)</h5>
-                    
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Nouveau mot de passe</label>
-                        <input type="password" 
-                               class="form-control" 
-                               id="password" 
-                               name="password"
-                               placeholder="Laisser vide pour ne pas modifier">
-                        <small class="form-text text-muted">Au moins 6 caractères. Laisser vide pour ne pas modifier</small>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirmer le nouveau mot de passe</label>
-                        <input type="password" 
-                               class="form-control" 
-                               id="confirm_password" 
-                               name="confirm_password"
-                               placeholder="Confirmation du nouveau mot de passe">
-                    </div>
-
-                    <div class="d-flex justify-content-between mt-4">
-                        <a href="{{ path('app_my_profile') }}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Annuler
-                        </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-check-circle"></i> Enregistrer les modifications
-                        </button>
-                    </div>
-                </form>
-            </div>
+    {# Zone de danger #}
+    <div class="card" style="margin-top: var(--spacing-xl); border-color: var(--color-error);">
+        <div class="card-body">
+            <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-sm); color: var(--color-error);">
+                <i class="bi bi-exclamation-triangle"></i> Zone de danger
+            </h3>
+            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                Actions irréversibles sur votre compte
+            </p>
+            <button type="button" class="btn" style="background: var(--color-error); color: white;" onclick="if(confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.')) { alert('Fonctionnalité à implémenter'); }">
+                <i class="bi bi-trash"></i>
+                <span>Supprimer mon compte</span>
+            </button>
         </div>
     </div>
 </div>

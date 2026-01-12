@@ -55,33 +55,49 @@ class PublicationController extends AbstractController
             if (empty($description) && empty($images)) {
                 $error = "Vous devez fournir au moins une description ou une image.";
             } else {
-                // Valider les extensions des images
-                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
-                $invalidImages = [];
+
+                // Limite de taille par image (en octets)
+                $maxFileSize = 10 * 1024 * 1024; // 10 MB
+                $tooLargeFiles = [];
 
                 foreach ($images as $image) {
-                    $extension = strtolower($image->getClientOriginalExtension());
-                    if (!in_array($extension, $allowedExtensions)) {
-                        $invalidImages[] = $image->getClientOriginalName();
+                    if ($image->getSize() > $maxFileSize) {
+                        $tooLargeFiles[] = $image->getClientOriginalName() . ' (' . round($image->getSize() / 1024 / 1024, 2) . ' MB)';
                     }
                 }
 
-                if (!empty($invalidImages)) {
-                    $error = "Format(s) d'image non supporté(s) : " . implode(', ', $invalidImages) . ". Formats acceptés : " . implode(', ', $allowedExtensions);
+                if (!empty($tooLargeFiles)) {
+                    $error = "Fichier(s) trop volumineux (max 10 MB) : " . implode(', ', $tooLargeFiles);
                 } else {
-                    try {
-                        // Préparer les données pour l'API
-                        $formData = [
-                            'description' => $description
-                        ];
 
-                        // Appel API avec multipart/form-data pour l'upload d'images
-                        $response = $this->apiService->postMultipart('/publications', $formData, $images, $token);
+                    // Valider les extensions des images
+                    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                    $invalidImages = [];
 
-                        $this->addFlash('success', 'Publication créée avec succès !');
-                        return $this->redirectToRoute('app_home');
-                    } catch (\Exception $e) {
-                        $error = "Erreur lors de la création de la publication. Veuillez réessayer.";
+                    foreach ($images as $image) {
+                        $extension = strtolower($image->getClientOriginalExtension());
+                        if (!in_array($extension, $allowedExtensions)) {
+                            $invalidImages[] = $image->getClientOriginalName();
+                        }
+                    }
+
+                    if (!empty($invalidImages)) {
+                        $error = "Format(s) d'image non supporté(s) : " . implode(', ', $invalidImages) . ". Formats acceptés : " . implode(', ', $allowedExtensions);
+                    } else {
+                        try {
+                            // Préparer les données pour l'API
+                            $formData = [
+                                'description' => $description
+                            ];
+
+                            // Appel API avec multipart/form-data pour l'upload d'images
+                            $response = $this->apiService->postMultipart('/publications', $formData, $images, $token);
+
+                            $this->addFlash('success', 'Publication créée avec succès !');
+                            return $this->redirectToRoute('app_home');
+                        } catch (\Exception $e) {
+                            $error = "Erreur lors de la création de la publication. Veuillez réessayer.";
+                        }
                     }
                 }
             }

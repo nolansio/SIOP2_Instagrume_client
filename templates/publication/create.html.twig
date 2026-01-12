@@ -2,43 +2,123 @@
 
 {% block title %}Créer une publication - Instagrume{% endblock %}
 
+{% block javascripts %}
+    <script src="{{ asset('js/createPubli.js') }}"></script>
+{% endblock %}
+
 {% block body %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-body">
-                <h2 class="card-title mb-4">
-                    <i class="bi bi-plus-circle text-success"></i> Créer une publication
-                </h2>
+<div class="container" style="max-width: 800px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-md);">
+    <div class="card">
+        <div class="card-body">
+            {# En-tête #}
+            <h2 style="display: flex; align-items: center; gap: var(--spacing-sm); margin: 0 0 var(--spacing-xl) 0; font-size: var(--font-size-2xl); font-weight: 700;">
+                <i class="bi bi-plus-circle" style="color: var(--color-primary);"></i>
+                <span>Nouvelle publication</span>
+            </h2>
+            
+            {# Message d'erreur #}
+            {% if error %}
+                <div class="alert alert-error" style="margin-bottom: var(--spacing-lg);">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
 
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
+            <form method="post" enctype="multipart/form-data" id="publication-form">
+                {# Description #}
+                <div class="form-group">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea 
+                        class="form-textarea" 
+                        id="description" 
+                        name="description" 
+                        rows="6"
+                        required
+                        placeholder="Parlez de vos fruits et légumes, partagez vos conseils, vos recettes..."
+                    ></textarea>
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        Soyez créatif et descriptif !
+                    </small>
+                </div>
 
-                <form method="post" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" 
-                                  rows="4" placeholder="Parlez de vos fruits et légumes..." required></textarea>
+                {# Upload d'images #}
+                <div class="form-group" style="margin-bottom: var(--spacing-xl);">
+                    <label class="form-label">Images</label>
+                    
+                    {# Input file caché #}
+                    <input 
+                        type="file" 
+                        id="images" 
+                        name="images[]" 
+                        accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" 
+                        multiple 
+                        style="display: none;"
+                    >
+                    
+                    {# Zone de drop/clic - ENTIÈREMENT CLIQUABLE #}
+                    <div 
+                        id="drop-zone"
+                        style="
+                            border: 2px dashed var(--color-border); 
+                            border-radius: var(--radius-md); 
+                            padding: var(--spacing-xl); 
+                            text-align: center; 
+                            background: var(--color-background-alt); 
+                            transition: all var(--transition-fast);
+                            cursor: pointer;
+                        "
+                    >
+                        <i class="bi bi-cloud-upload" style="font-size: 3rem; color: var(--color-primary); display: block; margin-bottom: var(--spacing-md);"></i>
+                        <p style="color: var(--color-text-primary); font-weight: 500; margin: 0 0 var(--spacing-xs) 0;">
+                            Cliquez pour sélectionner des images
+                        </p>
+                        <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
+                            ou glissez-déposez vos images ici
+                        </p>
+                        <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: var(--spacing-sm);">
+                            Formats acceptés : JPG, PNG, GIF, WEBP
+                        </p>
                     </div>
-
-                    <div class="mb-3">
-                        <label for="images" class="form-label">Images</label>
-                        <input type="file" class="form-control" id="images" name="images[]" 
-                               accept="image/*" multiple required>
-                        <small class="form-text text-muted">Vous pouvez sélectionner plusieurs images</small>
+                    
+                    {# Preview des images #}
+                    <div id="preview-container" style="display: none; margin-top: var(--spacing-lg);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-md);">
+                            <p style="font-weight: 600; margin: 0;">
+                                <i class="bi bi-images"></i>
+                                <span id="image-count">0</span> image(s) sélectionnée(s)
+                            </p>
+                            <button 
+                                type="button" 
+                                id="add-more-btn"
+                                class="btn btn-sm btn-ghost"
+                                style="padding: var(--spacing-xs) var(--spacing-sm);"
+                            >
+                                <i class="bi bi-plus-circle"></i>
+                                <span>Ajouter des images</span>
+                            </button>
+                        </div>
+                        
+                        {# Grille de previews #}
+                        <div id="preview-grid" style="
+                            display: grid; 
+                            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+                            gap: var(--spacing-md);
+                        "></div>
                     </div>
+                </div>
 
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ path('app_home') }}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Annuler
-                        </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-check-circle"></i> Publier
-                        </button>
-                    </div>
-                </form>
-            </div>
+                {# Boutons d'action #}
+                <div style="display: flex; gap: var(--spacing-md); justify-content: space-between;">
+                    <a href="{{ path('app_home') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Annuler</span>
+                    </a>
+                    <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                        <i class="bi bi-check-circle"></i>
+                        <span>Publier</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

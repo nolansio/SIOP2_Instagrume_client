@@ -1,41 +1,116 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier une publication - Instagrume{% endblock %}
+{% block title %}Modifier la publication - Instagrume{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('js/editPubli.js') }}"></script>
+{% endblock %}
 
 {% block body %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow">
-            <div class="card-body">
-                <h2 class="card-title mb-4">
-                    <i class="bi bi-pencil text-success"></i> Modifier la publication
-                </h2>
+<div class="container" style="max-width: 800px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-md);">
+    {# En-tête #}
+    <div style="margin-bottom: var(--spacing-xl);">
+        <h1 style="font-size: var(--font-size-3xl); font-weight: 700; margin-bottom: var(--spacing-xs);">
+            <i class="bi bi-pencil-square" style="color: var(--color-primary);"></i>
+            Modifier la publication
+        </h1>
+        <p style="color: var(--color-text-muted);">Mettez à jour la description de votre publication</p>
+    </div>
 
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
+    {# Erreur #}
+    {% if error %}
+        <div class="alert alert-error" style="margin-bottom: var(--spacing-lg);">
+            <i class="bi bi-exclamation-triangle"></i>
+            <span>{{ error }}</span>
+        </div>
+    {% endif %}
 
-                <form method="post">
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" name="description" 
-                                  rows="4" required>{{ publication.description }}</textarea>
+    <div class="card">
+        <div class="card-body">
+            {# Aperçu des images (non modifiable) #}
+            {% if publication.images is not empty %}
+                <div style="margin-bottom: var(--spacing-xl);">
+                    <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-md);">
+                        <i class="bi bi-images"></i> Images actuelles
+                    </h3>
+                    <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                        Les images ne peuvent pas être modifiées
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-md);">
+                        {% for image in publication.images %}
+                            <div style="position: relative; padding-bottom: 100%; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
+                                <img 
+                                    src="https://127.0.0.1:3000{{ image.url }}" 
+                                    alt="Image {{ loop.index }}"
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
+                                >
+                            </div>
+                        {% endfor %}
                     </div>
+                </div>
+                <hr style="border-top: 1px solid var(--color-border-light); margin: var(--spacing-xl) 0;">
+            {% endif %}
 
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Note : Les images ne peuvent pas être modifiées après la publication.
-                    </div>
+            {# Formulaire #}
+            <form method="post">
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        <i class="bi bi-chat-text"></i> Description *
+                    </label>
+                    <textarea 
+                        class="form-textarea" 
+                        id="description" 
+                        name="description" 
+                        rows="6" 
+                        required
+                        placeholder="Décrivez votre publication..."
+                    >{{ publication.description }}</textarea>
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        <i class="bi bi-info-circle"></i> Partagez vos pensées sur cette publication
+                    </small>
+                </div>
 
-                    <div class="d-flex justify-content-between">
-                        <a href="{{ path('app_home') }}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left"></i> Annuler
-                        </a>
-                        <button type="submit" class="btn btn-success">
-                            <i class="bi bi-check-circle"></i> Enregistrer
-                        </button>
-                    </div>
-                </form>
-            </div>
+                {# Infos publication #}
+                <div style="background: var(--color-background-alt); padding: var(--spacing-md); border-radius: var(--radius-md); margin-top: var(--spacing-lg);">
+                    <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: 0;">
+                        <i class="bi bi-calendar"></i> Créée le {{ publication.created_at|date('d/m/Y à H:i') }}
+                    </p>
+                    <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin: var(--spacing-xs) 0 0 0;">
+                        <i class="bi bi-heart"></i> {{ publication.likes|length }} j'aime · 
+                        <i class="bi bi-chat"></i> {{ publication.comments|length }} commentaires
+                    </p>
+                </div>
+
+                {# Boutons #}
+                <div style="margin-top: var(--spacing-xl);">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">
+                        <i class="bi bi-check-circle"></i>
+                        <span>Enregistrer les modifications</span>
+                    </button>
+                    <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i>
+                        <span>Annuler</span>
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# Zone de danger #}
+    <div class="card" style="margin-top: var(--spacing-xl); border-color: var(--color-error);">
+        <div class="card-body">
+            <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-sm); color: var(--color-error);">
+                <i class="bi bi-exclamation-triangle"></i> Zone de danger
+            </h3>
+            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                Actions irréversibles sur cette publication
+            </p>
+            <form method="post" action="{{ path('app_publication_delete', {id: publication.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.');">
+                <button type="submit" class="btn" style="background: var(--color-error); color: white;">
+                    <i class="bi bi-trash"></i>
+                    <span>Supprimer cette publication</span>
+                </button>
+            </form>
         </div>
     </div>
 </div>

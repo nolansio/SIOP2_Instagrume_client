@@ -2,263 +2,404 @@
 
 {% block title %}Dashboard Modération - Instagrume{% endblock %}
 
+{% block javascripts %}
+    <script src="{{ asset('js/dashboard.js') }}"></script>
+{% endblock %}
+
 {% block body %}
-<div class="container-fluid">
-    <h1 class="mb-4">
-        <i class="bi bi-shield-check text-warning"></i> Dashboard de Modération
-    </h1>
-
-    {% for message in app.flashes('success') %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container" style="max-width: 1400px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-md);">
+    
+    {# Vérification des permissions #}
+    {% if app.session.get('user') and ('ROLE_MOD' in app.session.get('user').roles or 'ROLE_ADMIN' in app.session.get('user').roles) %}
+        
+        {# En-tête #}
+        <div style="margin-bottom: var(--spacing-xl);">
+            <h1 style="font-size: var(--font-size-3xl); font-weight: 700; margin-bottom: var(--spacing-xs);">
+                <i class="bi bi-shield-check" style="color: var(--color-primary);"></i>
+                Dashboard Modération
+            </h1>
+            <p style="color: var(--color-text-muted);">
+                {% if 'ROLE_ADMIN' in app.session.get('user').roles %}
+                    Administrateur
+                {% else %}
+                    Modérateur
+                {% endif %}
+            </p>
         </div>
-    {% endfor %}
 
-    {% for message in app.flashes('danger') %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    {% endfor %}
-
-    <div class="row">
-        {# Section Utilisateurs #}
-        <div class="col-md-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-people"></i> Gestion des Utilisateurs
-                    </h5>
-                </div>
+        {# Statistiques #}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+            {# Total utilisateurs #}
+            <div class="card">
                 <div class="card-body">
-                    {% if users is not empty %}
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Utilisateur</th>
-                                        <th>Rôle</th>
-                                        <th>Statut</th>
-                                        <th>Banni jusqu'au</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for user in users %}
-                                        {# Ne pas afficher les admins et modérateurs dans la liste #}
-                                        {% if 'ROLE_ADMIN' not in user.roles and 'ROLE_MOD' not in user.roles %}
-                                            <tr>
-                                                <td>
-                                                    <a href="{{ path('app_user_profile', {username: user.username}) }}" 
-                                                       class="text-decoration-none">
-                                                        {{ user.username }}
-                                                    </a>
-                                                </td>
-                                                <td>
-                                                    {% if 'ROLE_ADMIN' in user.roles %}
-                                                        <span class="badge bg-danger">Admin</span>
-                                                    {% elseif 'ROLE_MOD' in user.roles %}
-                                                        <span class="badge bg-warning">Modérateur</span>
-                                                    {% else %}
-                                                        <span class="badge bg-secondary">Utilisateur</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if is_banned(user) %}
-                                                        <span class="badge bg-danger">Banni</span>
-                                                    {% else %}
-                                                        <span class="badge bg-success">Actif</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if is_banned(user) and user.banned_until %}
-                                                        {{ user.banned_until|date('d/m/Y H:i') }}
-                                                    {% else %}
-                                                        <span class="text-muted">-</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    {% if is_banned(user) %}
-                                                        <form method="post" action="{{ path('app_moderation_unban', {id: user.id}) }}" class="d-inline">
-                                                            <button type="submit" class="btn btn-sm btn-success">
-                                                                <i class="bi bi-check-circle"></i> Débannir
-                                                            </button>
-                                                        </form>
-                                                    {% else %}
-                                                        {# Bouton qui ouvre le modal #}
-                                                        <button type="button" class="btn btn-sm btn-danger" 
-                                                                data-bs-toggle="modal" 
-                                                                data-bs-target="#banModal{{ user.id }}">
-                                                            <i class="bi bi-x-circle"></i> Bannir
-                                                        </button>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin: 0;">Total Utilisateurs</p>
+                            <h2 style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-xs) 0 0 0; color: var(--color-primary);">
+                                {{ users|length }}
+                            </h2>
+                        </div>
+                        <i class="bi bi-people" style="font-size: 3rem; color: var(--color-primary); opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
 
-                                                        {# Modal pour choisir la durée #}
-                                                        <div class="modal fade" id="banModal{{ user.id }}" tabindex="-1" aria-labelledby="banModalLabel{{ user.id }}" aria-hidden="true">
-                                                            <div class="modal-dialog">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header bg-danger text-white">
-                                                                        <h5 class="modal-title" id="banModalLabel{{ user.id }}">
-                                                                            <i class="bi bi-exclamation-triangle"></i> Bannir {{ user.username }}
-                                                                        </h5>
-                                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <form method="post" action="{{ path('app_moderation_ban', {id: user.id}) }}">
-                                                                        <div class="modal-body">
-                                                                            <div class="alert alert-warning">
-                                                                                <i class="bi bi-info-circle"></i> 
-                                                                                Vous êtes sur le point de bannir <strong>{{ user.username }}</strong>
-                                                                            </div>
-                                                                            
-                                                                            <div class="mb-3">
-                                                                                <label for="ban_duration{{ user.id }}" class="form-label">
-                                                                                    <i class="bi bi-calendar"></i> Durée du bannissement (en jours)
-                                                                                </label>
-                                                                                <input type="number" 
-                                                                                       class="form-control" 
-                                                                                       id="ban_duration{{ user.id }}" 
-                                                                                       name="ban_duration" 
-                                                                                       min="1" 
-                                                                                       max="365" 
-                                                                                       value="7" 
-                                                                                       required>
-                                                                                <div class="form-text">
-                                                                                    Minimum : 1 jour - Maximum : 365 jours (1 an)
-                                                                                </div>
-                                                                            </div>
+            {# Utilisateurs bannis #}
+            <div class="card">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin: 0;">Utilisateurs Bannis</p>
+                            <h2 style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-xs) 0 0 0; color: var(--color-error);">
+                                {% set banned_count = 0 %}
+                                {% for user in users %}
+                                    {% if user.banned_until and user.banned_until|date('U') > 'now'|date('U') %}
+                                        {% set banned_count = banned_count + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ banned_count }}
+                            </h2>
+                        </div>
+                        <i class="bi bi-ban" style="font-size: 3rem; color: var(--color-error); opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
 
-                                                                            <div class="mb-3">
-                                                                                <label class="form-label">Durées prédéfinies :</label>
-                                                                                <div class="btn-group w-100" role="group">
-                                                                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('ban_duration{{ user.id }}').value = 1">1 jour</button>
-                                                                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('ban_duration{{ user.id }}').value = 7">7 jours</button>
-                                                                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('ban_duration{{ user.id }}').value = 30">30 jours</button>
-                                                                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('ban_duration{{ user.id }}').value = 365">1 an</button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                                                <i class="bi bi-x"></i> Annuler
-                                                                            </button>
-                                                                            <button type="submit" class="btn btn-danger">
-                                                                                <i class="bi bi-ban"></i> Confirmer le bannissement
-                                                                            </button>
-                                                                        </div>
-                                                                    </form>
-                                                                </div>
-                                                            </div>
-                                                        </div>
+            {# Total publications #}
+            <div class="card">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin: 0;">Total Publications</p>
+                            <h2 style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-xs) 0 0 0; color: var(--color-success);">
+                                {% set total_publications = 0 %}
+                                {% for user in users %}
+                                    {% set total_publications = total_publications + user.publications|length %}
+                                {% endfor %}
+                                {{ total_publications }}
+                            </h2>
+                        </div>
+                        <i class="bi bi-image" style="font-size: 3rem; color: var(--color-success); opacity: 0.2;"></i>
+                    </div>
+                </div>
+            </div>
 
-                                                        {# Script pour calculer la date de fin #}
-                                                        <script>
-                                                            (function() {
-                                                                const input = document.getElementById('ban_duration{{ user.id }}');
-                                                                const dateSpan = document.getElementById('ban_end_date{{ user.id }}');
-                                                                
-                                                                function updateEndDate() {
-                                                                    const days = parseInt(input.value) || 0;
-                                                                    const now = new Date();
-                                                                    const endDate = new Date(now.getTime() + (days * 24 * 60 * 60 * 1000));
-                                                                    
-                                                                    const options = { 
-                                                                        year: 'numeric', 
-                                                                        month: 'long', 
-                                                                        day: 'numeric',
-                                                                        hour: '2-digit',
-                                                                        minute: '2-digit'
-                                                                    };
-                                                                    dateSpan.textContent = endDate.toLocaleDateString('fr-FR', options);
-                                                                }
-                                                                
-                                                                input.addEventListener('input', updateEndDate);
-                                                                updateEndDate();
-                                                            })();
-                                                        </script>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
+            {# Publications verrouillées #}
+            <div class="card">
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin: 0;">Publications Verrouillées</p>
+                            <h2 style="font-size: var(--font-size-3xl); font-weight: 700; margin: var(--spacing-xs) 0 0 0; color: var(--color-warning);">
+                                {% set locked_count = 0 %}
+                                {% for user in users %}
+                                    {% for pub in user.publications %}
+                                        {% if pub.is_locked %}
+                                            {% set locked_count = locked_count + 1 %}
                                         {% endif %}
                                     {% endfor %}
-                                </tbody>
-                            </table>
+                                {% endfor %}
+                                {{ locked_count }}
+                            </h2>
                         </div>
-                    {% else %}
-                        <p class="text-muted text-center">Aucun utilisateur à modérer.</p>
-                    {% endif %}
+                        <i class="bi bi-lock" style="font-size: 3rem; color: var(--color-warning); opacity: 0.2;"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        {# Section Publications #}
-        <div class="col-md-6 mb-4">
-            <div class="card shadow">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">
-                        <i class="bi bi-file-earmark-lock"></i> Gestion des Publications
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if publications is not empty %}
-                        <div class="list-group">
-                            {% for publication in publications %}
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">
-                                                <a href="{{ path('app_publication_view', {id: publication.id}) }}" 
-                                                   class="text-decoration-none">
-                                                    Publication #{{ publication.id }}
-                                                </a>
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                Par <strong>{{ publication.user.username }}</strong>
-                                            </p>
-                                            {% if publication.is_locked %}
-                                                <span class="badge bg-danger ms-2">Verrouillée</span>
-                                            {% endif %}
-                                        </div>
-                                        <div class="ms-3">
-                                            {% if publication.is_locked %}
-                                                <form method="post" action="{{ path('app_publication_unlock', {id: publication.id}) }}">
-                                                    <button type="submit" class="btn btn-sm btn-success">
-                                                        <i class="bi bi-unlock"></i> Déverrouiller
-                                                    </button>
+        {# Gestion des utilisateurs #}
+        <div class="card" style="margin-bottom: var(--spacing-xl);">
+            <div class="card-body">
+                <h2 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-lg);">
+                    <i class="bi bi-people"></i> Gestion des Utilisateurs
+                </h2>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--color-border-light);">
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Avatar</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Utilisateur</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Rôle</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Statut</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Banni jusqu'au</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Publications</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                {% set is_banned = user.banned_until and user.banned_until|date('U') > 'now'|date('U') %}
+                                <tr style="border-bottom: 1px solid var(--color-border-light);">
+                                    {# Avatar #}
+                                    <td style="padding: var(--spacing-md);">
+                                        {% if user.images is defined and user.images is not empty %}
+                                            <img 
+                                                src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                                                alt="{{ user.username }}"
+                                                style="width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary);"
+                                            >
+                                        {% else %}
+                                            <i class="bi bi-person-circle" style="font-size: 2.5rem; color: var(--color-primary);"></i>
+                                        {% endif %}
+                                    </td>
+
+                                    {# Utilisateur #}
+                                    <td style="padding: var(--spacing-md);">
+                                        <a href="{{ path('app_user_profile', {username: user.username}) }}" style="font-weight: 600; color: var(--color-text-primary); text-decoration: none;">
+                                            {{ user.username }}
+                                        </a>
+                                        {% if user.username == app.session.get('user').username %}
+                                            <span class="badge" style="background: var(--color-info); margin-left: var(--spacing-xs); font-size: var(--font-size-xs);">
+                                                Vous
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    {# Rôle #}
+                                    <td style="padding: var(--spacing-md);">
+                                        {% if 'ROLE_ADMIN' in user.roles %}
+                                            <span class="badge" style="background: var(--color-error); font-size: var(--font-size-xs);">
+                                                <i class="bi bi-shield-fill-check"></i> Admin
+                                            </span>
+                                        {% elseif 'ROLE_MOD' in user.roles %}
+                                            <span class="badge" style="background: var(--color-warning); font-size: var(--font-size-xs);">
+                                                <i class="bi bi-shield-check"></i> Mod
+                                            </span>
+                                        {% else %}
+                                            <span class="badge" style="background: var(--color-text-muted); font-size: var(--font-size-xs);">
+                                                <i class="bi bi-person"></i> User
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    {# Statut #}
+                                    <td style="padding: var(--spacing-md);">
+                                        {% if is_banned %}
+                                            <span class="badge" style="background: var(--color-error); font-size: var(--font-size-xs);">
+                                                <i class="bi bi-ban"></i> Banni
+                                            </span>
+                                        {% else %}
+                                            <span class="badge" style="background: var(--color-success); font-size: var(--font-size-xs);">
+                                                <i class="bi bi-check-circle"></i> Actif
+                                            </span>
+                                        {% endif %}
+                                    </td>
+
+                                    {# Banni jusqu'au #}
+                                    <td style="padding: var(--spacing-md); color: var(--color-text-muted); font-size: var(--font-size-sm);">
+                                        {% if is_banned %}
+                                            {{ user.banned_until|date('d/m/Y H:i') }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+
+                                    {# Publications #}
+                                    <td style="padding: var(--spacing-md); color: var(--color-text-muted); font-size: var(--font-size-sm);">
+                                        {{ user.publications|length }}
+                                    </td>
+
+                                    {# Actions #}
+                                    <td style="padding: var(--spacing-md);">
+                                        {% if user.username != app.session.get('user').username and 'ROLE_ADMIN' not in user.roles %}
+                                            {% if is_banned %}
+                                                <form method="post" action="{{ path('app_moderation_unban', {id: user.id}) }}" style="display: inline;">
+                                                    <button type="submit" class="btn btn-sm" style="background: var(--color-success); color: white; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-xs);">Débannir</button>
                                                 </form>
                                             {% else %}
-                                                <form method="post" action="{{ path('app_publication_lock', {id: publication.id}) }}">
-                                                    <button type="submit" class="btn btn-sm btn-warning">
-                                                        <i class="bi bi-lock"></i> Verrouiller
-                                                    </button>
-                                                </form>
+                                                <button type="button" class="btn btn-sm" style="background: var(--color-error); color: white; padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-xs);" onclick="showBanModal({{ user.id }}, '{{ user.username }}')">Bannir</button>
                                             {% endif %}
-                                            
-                                            {# Modérateur peut supprimer les publications des utilisateurs normaux #}
-                                            {% if 'ROLE_ADMIN' not in publication.user.roles and 'ROLE_MOD' not in publication.user.roles %}
-                                                <form method="post" action="{{ path('app_publication_delete', {id: publication.id}) }}" class="mt-1">
-                                                    <button type="submit" class="btn btn-sm btn-danger"
-                                                            onclick="return confirm('Supprimer cette publication ?')">
-                                                        <i class="bi bi-trash"></i> Supprimer
-                                                    </button>
-                                                </form>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
+                                        {% else %}
+                                            <span style="color: var(--color-text-muted); font-size: var(--font-size-sm);">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center">Aucune publication à modérer.</p>
-                    {% endif %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="text-center mt-3">
-        <a href="{{ path('app_home') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Retour à l'accueil
-        </a>
+        {# Gestion des publications #}
+        <div class="card">
+            <div class="card-body">
+                <h2 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-lg);">
+                    <i class="bi bi-images"></i> Gestion des Publications
+                </h2>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--color-border-light);">
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Image</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Description</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Auteur</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Date</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Statut</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Stats</th>
+                                <th style="padding: var(--spacing-md); text-align: left; font-weight: 600;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                                {% for publication in user.publications %}
+                                    <tr style="border-bottom: 1px solid var(--color-border-light);">
+                                        {# Image #}
+                                        <td style="padding: var(--spacing-md);">
+                                            {% if publication.images is not empty %}
+                                                <img 
+                                                    src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                                                    alt="Publication"
+                                                    style="width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover;"
+                                                >
+                                            {% else %}
+                                                <div style="width: 60px; height: 60px; background: var(--color-background-alt); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-image" style="color: var(--color-text-muted);"></i>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+
+                                        {# Description #}
+                                        <td style="padding: var(--spacing-md); max-width: 300px;">
+                                            <p style="margin: 0; font-size: var(--font-size-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                {{ publication.description }}
+                                            </p>
+                                        </td>
+
+                                        {# Auteur #}
+                                        <td style="padding: var(--spacing-md);">
+                                            <a href="{{ path('app_user_profile', {username: user.username}) }}" style="font-weight: 600; font-size: var(--font-size-sm); color: var(--color-text-primary); text-decoration: none;">
+                                                {{ user.username }}
+                                            </a>
+                                            {% if 'ROLE_ADMIN' in user.roles %}
+                                                <span class="badge" style="background: var(--color-error); font-size: 0.65rem; margin-left: var(--spacing-xs);">Admin</span>
+                                            {% elseif 'ROLE_MOD' in user.roles %}
+                                                <span class="badge" style="background: var(--color-warning); font-size: 0.65rem; margin-left: var(--spacing-xs);">Mod</span>
+                                            {% endif %}
+                                        </td>
+
+                                        {# Date #}
+                                        <td style="padding: var(--spacing-md); color: var(--color-text-muted); font-size: var(--font-size-sm);">
+                                            {{ publication.created_at|date('d/m/Y') }}
+                                        </td>
+
+                                        {# Statut #}
+                                        <td style="padding: var(--spacing-md);">
+                                            {% if publication.is_locked %}
+                                                <span class="badge" style="background: var(--color-warning); font-size: var(--font-size-xs);">
+                                                    <i class="bi bi-lock-fill"></i> Verrouillée
+                                                </span>
+                                            {% else %}
+                                                <span class="badge" style="background: var(--color-success); font-size: var(--font-size-xs);">
+                                                    <i class="bi bi-unlock"></i> Ouverte
+                                                </span>
+                                            {% endif %}
+                                        </td>
+
+                                        {# Stats #}
+                                        <td style="padding: var(--spacing-md); color: var(--color-text-muted); font-size: var(--font-size-xs);">
+                                            <i class="bi bi-heart"></i> {{ publication.likes|length }}
+                                            <i class="bi bi-chat" style="margin-left: var(--spacing-sm);"></i> {{ publication.comments|length }}
+                                        </td>
+
+                                        {# Actions #}
+                                        <td style="padding: var(--spacing-md);">
+                                            <div style="display: flex; gap: var(--spacing-xs);">
+                                                <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="btn btn-sm btn-ghost" style="padding: var(--spacing-xs); font-size: var(--font-size-xs);" title="Voir">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                
+                                                {% if publication.is_locked %}
+                                                    <form method="post" action="{{ path('app_publication_unlock', {id: publication.id}) }}" style="display: inline;">
+                                                        <button type="submit" class="btn btn-sm" style="background: var(--color-success); color: white; padding: var(--spacing-xs); font-size: var(--font-size-xs);" title="Déverrouiller">
+                                                            <i class="bi bi-unlock"></i>
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    <form method="post" action="{{ path('app_publication_lock', {id: publication.id}) }}" style="display: inline;">
+                                                        <button type="submit" class="btn btn-sm" style="background: var(--color-warning); color: white; padding: var(--spacing-xs); font-size: var(--font-size-xs);" title="Verrouiller">
+                                                            <i class="bi bi-lock"></i>
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_publications == 0 %}
+                    <div style="text-align: center; padding: var(--spacing-3xl); color: var(--color-text-muted);">
+                        <i class="bi bi-inbox" style="font-size: 4rem; display: block; margin-bottom: var(--spacing-md);"></i>
+                        <p>Aucune publication pour le moment</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    {% else %}
+        {# Pas de permission #}
+        <div class="card">
+            <div class="card-body" style="text-align: center; padding: var(--spacing-3xl);">
+                <i class="bi bi-shield-exclamation" style="font-size: 5rem; color: var(--color-error); display: block; margin-bottom: var(--spacing-lg);"></i>
+                <h2 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-md);">
+                    Accès interdit
+                </h2>
+                <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-xl);">
+                    Vous devez être modérateur ou administrateur pour accéder à cette page.
+                </p>
+                <a href="{{ path('app_home') }}" class="btn btn-primary">
+                    <i class="bi bi-house"></i>
+                    <span>Retour à l'accueil</span>
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{# Modal de bannissement #}
+<div id="ban-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="max-width: 500px; margin: var(--spacing-xl); animation: slideUp 0.3s ease;">
+        <div class="card-body">
+            <h3 style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-md);">
+                <i class="bi bi-ban" style="color: var(--color-error);"></i>
+                Bannir un utilisateur
+            </h3>
+            <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-lg);">
+                Bannir <strong id="ban-username"></strong> ?
+            </p>
+            
+            <form id="ban-form" method="post" data-ban-url="{{ path('app_moderation_ban', {id: 0}) }}">>
+                <div class="form-group">
+                    <label for="ban_duration" class="form-label">Durée du bannissement (en jours)</label>
+                    <select class="form-input" id="ban_duration" name="ban_duration" required>
+                        <option value="1">1 jour</option>
+                        <option value="3">3 jours</option>
+                        <option value="7" selected>7 jours (1 semaine)</option>
+                        <option value="14">14 jours (2 semaines)</option>
+                        <option value="30">30 jours (1 mois)</option>
+                        <option value="90">90 jours (3 mois)</option>
+                        <option value="365">365 jours (1 an)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg);">
+                    <button type="submit" class="btn" style="background: var(--color-error); color: white; flex: 1;">
+                        <span>Bannir</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="closeBanModal()">
+                        <i class="bi bi-x"></i>
+                        <span>Annuler</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
