@@ -26,7 +26,6 @@ class PublicationViewController extends AbstractController
         try {
             $publication = $this->publicationService->getPublicationById($id, $token);
         } catch (\Exception $e) {
-            $this->addFlash('danger', 'Publication non trouvée.');
             return $this->redirectToRoute('app_home');
         }
 
