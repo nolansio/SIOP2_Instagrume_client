@@ -3,44 +3,84 @@
 {% block title %}Inscription - Instagrume{% endblock %}
 
 {% block body %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-body">
-                <h2 class="card-title text-center mb-4">
-                    <i class="bi bi-person-plus"></i> Inscription
-                </h2>
+<div style="max-width: 440px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-body">
+            {# En-tête #}
+            <div class="text-center" style="margin-bottom: var(--spacing-xl);">
+                <h2 style="margin-bottom: var(--spacing-sm);">Inscription</h2>
+                <p class="text-muted" style="margin: 0;">Rejoignez la communauté Instagrume</p>
+            </div>
 
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
+            {# Message d'erreur #}
+            {% if error %}
+                <div class="alert alert-error">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
 
-                <form method="post">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Nom d'utilisateur</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
-                    </div>
+            {# Formulaire d'inscription #}
+            <form method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="username" class="form-label">Nom d'utilisateur</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        autofocus
+                        placeholder="Choisissez un nom d'utilisateur"
+                    >
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        Utilisez des lettres, chiffres et underscores uniquement
+                    </small>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Mot de passe</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                        <small class="form-text text-muted">Au moins 6 caractères</small>
-                    </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Mot de passe</label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="password" 
+                        name="password" 
+                        required
+                        placeholder="Choisissez un mot de passe sécurisé"
+                    >
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        Minimum 8 caractères recommandés
+                    </small>
+                </div>
 
-                    <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirmer le mot de passe</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                    </div>
+                <div class="form-group">
+                    <label for="confirm_password" class="form-label">Confirmer le mot de passe</label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="confirm_password" 
+                        name="confirm_password" 
+                        required
+                        placeholder="Confirmez votre mot de passe"
+                    >
+                    <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
+                        Doit être identique au mot de passe
+                    </small>
+                </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success btn-lg">S'inscrire</button>
-                    </div>
-                </form>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Créer mon compte</span>
+                </button>
+            </form>
 
-                <hr class="my-4">
-                <p class="text-center mb-0">
-                    Vous avez déjà un compte ? 
-                    <a href="{{ path('app_login') }}">Connexion</a>
+            {# Lien vers connexion #}
+            <div style="margin-top: var(--spacing-xl); padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-light); text-align: center;">
+                <p class="text-muted" style="margin: 0;">
+                    Déjà un compte ? 
+                    <a href="{{ path('app_login') }}" style="font-weight: 600; color: var(--color-primary);">
+                        Se connecter
+                    </a>
                 </p>
             </div>
         </div>

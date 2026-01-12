@@ -3,38 +3,63 @@
 {% block title %}Connexion - Instagrume{% endblock %}
 
 {% block body %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-body">
-                <h2 class="card-title text-center mb-4">
-                    <i class="bi bi-box-arrow-in-right"></i> Connexion
-                </h2>
+<div style="max-width: 440px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-body">
+            {# En-tête #}
+            <div class="text-center" style="margin-bottom: var(--spacing-xl);">
+                <h2 style="margin-bottom: var(--spacing-sm);">Connexion</h2>
+                <p class="text-muted" style="margin: 0;">Bienvenue sur Instagrume</p>
+            </div>
 
-                {% if error %}
-                    <div class="alert alert-danger">{{ error }}</div>
-                {% endif %}
+            {# Message d'erreur #}
+            {% if error %}
+                <div class="alert alert-error">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span>{{ error }}</span>
+                </div>
+            {% endif %}
 
-                <form method="post">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Nom d'utilisateur</label>
-                        <input type="text" class="form-control" id="username" name="username" required autofocus>
-                    </div>
+            {# Formulaire de connexion #}
+            <form method="post">
+                <div class="form-group">
+                    <label for="username" class="form-label">Nom d'utilisateur</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        autofocus
+                        placeholder="Entrez votre nom d'utilisateur"
+                    >
+                </div>
 
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Mot de passe</label>
-                        <input type="password" class="form-control" id="password" name="password" required>
-                    </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Mot de passe</label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="password" 
+                        name="password" 
+                        required
+                        placeholder="Entrez votre mot de passe"
+                    >
+                </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success btn-lg">Se connecter</button>
-                    </div>
-                </form>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Se connecter</span>
+                </button>
+            </form>
 
-                <hr class="my-4">
-                <p class="text-center mb-0">
+            {# Lien vers inscription #}
+            <div style="margin-top: var(--spacing-xl); padding-top: var(--spacing-xl); border-top: 1px solid var(--color-border-light); text-align: center;">
+                <p class="text-muted" style="margin: 0;">
                     Pas encore de compte ? 
-                    <a href="{{ path('app_register') }}">Inscription</a>
+                    <a href="{{ path('app_register') }}" style="font-weight: 600; color: var(--color-primary);">
+                        Créer un compte
+                    </a>
                 </p>
             </div>
         </div>

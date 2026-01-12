@@ -3,78 +3,133 @@
 {% block title %}Mon Profil - Instagrume{% endblock %}
 
 {% block body %}
-<div class="row">
-    <div class="col-md-4">
-        <div class="card shadow">
-            <div class="card-body text-center">
-                {% if user.images is not empty %}
-                    <img src="https://127.0.0.1:3000{{ user.images[0].url }}" 
-                         alt="Avatar" 
-                         class="rounded-circle mb-3" 
-                         style="width: 150px; height: 150px; object-fit: cover;">
-                {% else %}
-                    <i class="bi bi-person-circle text-success" style="font-size: 8rem;"></i>
-                {% endif %}
-                <h3 class="mt-3">{{ user.username }}</h3>
-                <p class="text-muted">
-                    {% if 'ROLE_ADMIN' in user.roles %}
-                        <span class="badge bg-danger">Administrateur</span>
-                    {% elseif 'ROLE_MOD' in user.roles %}
-                        <span class="badge bg-warning">Modérateur</span>
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-md);">
+    <div style="display: grid; grid-template-columns: 350px 1fr; gap: var(--spacing-xl);">
+        
+        {# Colonne de gauche - Carte utilisateur #}
+        <div>
+            <div class="card">
+                <div class="card-body" style="text-align: center;">
+                    {# Avatar #}
+                    {% if user.images is not empty %}
+                        <img 
+                            src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                            alt="Avatar" 
+                            style="width: 150px; height: 150px; border-radius: var(--radius-full); object-fit: cover; border: 4px solid var(--color-primary); margin-bottom: var(--spacing-md);"
+                        >
                     {% else %}
-                        <span class="badge bg-secondary">Utilisateur</span>
+                        <i class="bi bi-person-circle" style="font-size: 9.375rem; color: var(--color-primary); display: block; margin-bottom: var(--spacing-md);"></i>
                     {% endif %}
-                </p>
-                <hr>
-                <p><strong>{{ publications|length }}</strong> publications</p>
-                <hr>
-                <a href="{{ path('app_profile_edit') }}" class="btn btn-success w-100">
-                    <i class="bi bi-pencil"></i> Modifier mon profil
-                </a>
+                    
+                    {# Username #}
+                    <h3 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-sm);">
+                        {{ user.username }}
+                    </h3>
+                    
+                    {# Badge rôle #}
+                    <p style="margin-bottom: var(--spacing-lg);">
+                        {% if 'ROLE_ADMIN' in user.roles %}
+                            <span class="badge" style="background: var(--color-error);">
+                                <i class="bi bi-shield-fill-check"></i> Administrateur
+                            </span>
+                        {% elseif 'ROLE_MOD' in user.roles %}
+                            <span class="badge" style="background: var(--color-warning);">
+                                <i class="bi bi-shield-check"></i> Modérateur
+                            </span>
+                        {% else %}
+                            <span class="badge" style="background: var(--color-text-muted);">
+                                <i class="bi bi-person"></i> Utilisateur
+                            </span>
+                        {% endif %}
+                    </p>
+                    
+                    <hr style="border-color: var(--color-border-light); margin: var(--spacing-lg) 0;">
+                    
+                    {# Nombre de publications #}
+                    <p style="font-size: var(--font-size-lg); margin-bottom: var(--spacing-lg);">
+                        <strong style="font-size: var(--font-size-2xl); color: var(--color-primary);">{{ publications|length }}</strong>
+                        <span style="color: var(--color-text-muted);">publications</span>
+                    </p>
+                    
+                    <hr style="border-color: var(--color-border-light); margin: var(--spacing-lg) 0;">
+                    
+                    {# Bouton modifier #}
+                    <a href="{{ path('app_profile_edit') }}" class="btn btn-primary btn-spec" style="width: 100%;">
+                        <i class="bi bi-pencil"></i>
+                        <span>Modifier mon profil</span>
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="col-md-8">
-        <h3 class="mb-4">Mes Publications</h3>
         
-        {% if publications is empty %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> Vous n'avez pas encore de publications.
-                <a href="{{ path('app_publication_create') }}" class="alert-link">Créer une publication</a>
-            </div>
-        {% else %}
-            <div class="list-group">
-                {% for publication in publications %}
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h5 class="mb-1">{{ publication.description|slice(0, 100) }}{% if publication.description|length > 100 %}...{% endif %}</h5>
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar"></i> {{ publication.created_at|date('d/m/Y à H:i') }}
-                                    <i class="bi bi-heart ms-3"></i> {{ publication.likes|length }}
-                                    <i class="bi bi-chat ms-2"></i> {{ publication.comments|length }}
-                                </small>
-                            </div>
-                            <div>
-                                <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a href="{{ path('app_publication_edit', {id: publication.id}) }}" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form method="post" action="{{ path('app_publication_delete', {id: publication.id}) }}" class="d-inline">
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Supprimer cette publication ?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+        {# Colonne de droite - Publications #}
+        <div>
+            <h3 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-lg);">
+                <i class="bi bi-grid-3x3"></i> Mes Publications
+            </h3>
+            
+            {% if publications is empty %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>Vous n'avez pas encore de publications.</span>
+                </div>
+            {% else %}
+                {# Liste des publications #}
+                <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                    {% for publication in publications %}
+                        <div class="card">
+                            <div class="card-body">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--spacing-md);">
+                                    {# Contenu #}
+                                    <div style="flex: 1;">
+                                        {# Description #}
+                                        <h5 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-sm); line-height: 1.4;">
+                                            {{ publication.description|slice(0, 100) }}{% if publication.description|length > 100 %}...{% endif %}
+                                        </h5>
+                                        
+                                        {# Stats #}
+                                        <div style="display: flex; gap: var(--spacing-lg); color: var(--color-text-muted); font-size: var(--font-size-sm); flex-wrap: wrap;">
+                                            <span>
+                                                <i class="bi bi-calendar"></i>
+                                                {{ publication.created_at|date('d/m/Y à H:i') }}
+                                            </span>
+                                            <span>
+                                                <i class="bi bi-heart"></i>
+                                                {{ publication.likes|length }} j'aime
+                                            </span>
+                                            <span>
+                                                <i class="bi bi-chat"></i>
+                                                {{ publication.comments|length }} commentaires
+                                            </span>
+                                            {% if publication.is_locked == 1 or publication.is_locked == true or publication.is_locked == "1" %}
+                                                <span class="badge" style="background: var(--color-warning); font-size: var(--font-size-xs);">
+                                                    <i class="bi bi-lock-fill"></i> Verrouillée
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    {# Actions #}
+                                    <div style="display: flex; gap: var(--spacing-xs); flex-shrink: 0;">
+                                        <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="btn btn-sm btn-ghost" title="Voir" style="padding: var(--spacing-xs) var(--spacing-sm);">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{{ path('app_publication_edit', {id: publication.id}) }}" class="btn btn-sm" style="background: var(--color-warning); color: white; padding: var(--spacing-xs) var(--spacing-sm);" title="Modifier">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form method="post" action="{{ path('app_publication_delete', {id: publication.id}) }}" style="display: inline;" onsubmit="return confirm('Supprimer cette publication ?');">
+                                            <button type="submit" class="btn btn-sm" style="background: var(--color-error); color: white; padding: var(--spacing-xs) var(--spacing-sm);" title="Supprimer">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}
