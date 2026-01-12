@@ -32,22 +32,44 @@
         {% else %}
             {# Liste des résultats #}
             <div class="card">
-                {% for username in users %}
+                {% for user in users %}
                     <a 
-                        href="{{ path('app_user_profile', {username: username}) }}" 
+                        href="{{ path('app_user_profile', {username: user.username}) }}" 
                         style="display: block; padding: var(--spacing-lg); text-decoration: none; color: inherit; transition: background-color var(--transition-fast); {% if not loop.last %}border-bottom: 1px solid var(--color-border-light);{% endif %}"
                         onmouseover="this.style.backgroundColor='var(--color-surface-hover)'"
                         onmouseout="this.style.backgroundColor='transparent'"
                     >
                         <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                            <div style="width: 48px; height: 48px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--amber-5), var(--amber-7)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                                <i class="bi bi-person" style="font-size: 1.5rem; color: white;"></i>
-                            </div>
+                            {# Avatar #}
+                            {% if user.images is not empty %}
+                                <img 
+                                    src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                                    alt="{{ user.username }}"
+                                    style="width: 48px; height: 48px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary); flex-shrink: 0;"
+                                >
+                            {% else %}
+                                <div style="width: 48px; height: 48px; border-radius: var(--radius-full); background: linear-gradient(135deg, var(--amber-5), var(--amber-7)); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                    <i class="bi bi-person" style="font-size: 1.5rem; color: white;"></i>
+                                </div>
+                            {% endif %}
+                            
                             <div style="flex: 1; min-width: 0;">
                                 <h3 style="font-weight: 600; font-size: var(--font-size-lg); margin: 0; color: var(--color-text-primary);">
-                                    {{ username }}
+                                    {{ user.username }}
                                 </h3>
+                                
+                                {# Badges de rôle #}
+                                {% if 'ROLE_ADMIN' in user.roles %}
+                                    <span class="badge" style="background: var(--color-error); font-size: var(--font-size-xs); padding: 2px 8px; margin-top: 4px; display: inline-block;">
+                                        <i class="bi bi-shield-fill-check"></i> Admin
+                                    </span>
+                                {% elseif 'ROLE_MOD' in user.roles %}
+                                    <span class="badge" style="background: var(--color-warning); font-size: var(--font-size-xs); padding: 2px 8px; margin-top: 4px; display: inline-block;">
+                                        <i class="bi bi-shield-check"></i> Modérateur
+                                    </span>
+                                {% endif %}
                             </div>
+                            
                             <i class="bi bi-chevron-right" style="color: var(--color-text-muted);"></i>
                         </div>
                     </a>
