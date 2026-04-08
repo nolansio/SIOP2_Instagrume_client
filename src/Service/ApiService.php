@@ -11,7 +11,7 @@ class ApiService {
 
     public function __construct(HttpClientInterface $apiClient, #[Autowire(env: 'API_BASE')] string $apiBase) {
         $this->client = $apiClient;
-        $this->apiBase = $apiBase;
+        $this->apiBase = $apiBase . '/api';
     }
 
     /**

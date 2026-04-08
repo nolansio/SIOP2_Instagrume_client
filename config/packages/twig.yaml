@@ -1,5 +1,7 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        api_base: '%env(API_BASE)%'
 
 when@test:
     twig:

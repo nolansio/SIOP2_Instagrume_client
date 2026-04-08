@@ -47,8 +47,8 @@
                 <article class="publication-card">
                     {# Image de la publication #}
                     {% if publication.images is not empty %}
-                        <img 
-                            src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                        <img
+                            src="{{ api_base }}{{ publication.images[0].url }}"
                             alt="{{ publication.description }}"
                             class="publication-image"
                         >
@@ -57,14 +57,14 @@
                             <i class="bi bi-image" style="font-size: 3rem; color: var(--amber-8);"></i>
                         </div>
                     {% endif %}
-                    
+
                     {# Info de la publication #}
                     <div class="publication-info">
                         {# Auteur #}
                         <div style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
                             {% if publication.user.images is defined and publication.user.images is not empty %}
-                                <img 
-                                    src="https://127.0.0.1:3000{{ publication.user.images[0].url }}" 
+                                <img
+                                    src="{{ api_base }}{{ publication.user.images[0].url }}"
                                     alt="{{ publication.user.username }}"
                                     style="width: 32px; height: 32px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary);"
                                 >
@@ -75,12 +75,12 @@
                                 {{ publication.user.username }}
                             </span>
                         </div>
-                        
+
                         {# Description (tronquée) #}
                         <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                             {{ publication.description }}
                         </p>
-                        
+
                         {# Stats #}
                         <div style="display: flex; gap: var(--spacing-lg); margin-top: var(--spacing-md); font-size: var(--font-size-sm); color: var(--color-text-muted);">
                             <span>
