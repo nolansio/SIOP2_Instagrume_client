@@ -3,16 +3,15 @@
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-class ApiService
-{
+class ApiService {
     private HttpClientInterface $client;
-    private const API_BASE = 'https://127.0.0.1:3000/api';
+    private string $apiBase;
 
-    public function __construct(HttpClientInterface $apiClient)
-    {
+    public function __construct(HttpClientInterface $apiClient, #[Autowire(env: 'API_BASE')] string $apiBase) {
         $this->client = $apiClient;
+        $this->apiBase = $apiBase;
     }
 
     /**
@@ -25,7 +24,7 @@ class ApiService
             $headers['Authorization'] = 'Bearer ' . $token;
         }
 
-        $response = $this->client->request('GET', self::API_BASE . $endpoint, [
+        $response = $this->client->request('GET', $this->apiBase . $endpoint, [
             'headers' => $headers
         ]);
 
@@ -42,7 +41,7 @@ class ApiService
             $headers['Authorization'] = 'Bearer ' . $token;
         }
 
-        $response = $this->client->request('POST', self::API_BASE . $endpoint, [
+        $response = $this->client->request('POST', $this->apiBase . $endpoint, [
             'headers' => $headers,
             'json' => $data
         ]);
@@ -60,7 +59,7 @@ class ApiService
             $headers['Authorization'] = 'Bearer ' . $token;
         }
 
-        $response = $this->client->request('PUT', self::API_BASE . $endpoint, [
+        $response = $this->client->request('PUT', $this->apiBase . $endpoint, [
             'headers' => $headers,
             'json' => $data
         ]);
@@ -78,7 +77,7 @@ class ApiService
             $headers['Authorization'] = 'Bearer ' . $token;
         }
 
-        $this->client->request('DELETE', self::API_BASE . $endpoint, [
+        $this->client->request('DELETE', $this->apiBase . $endpoint, [
             'headers' => $headers
         ]);
     }
@@ -88,7 +87,7 @@ class ApiService
      */
     public function postMultipart(string $endpoint, array $data, array $files, ?string $token = null): array
     {
-        $url = self::API_BASE . $endpoint;
+        $url = $this->apiBase . $endpoint;
 
         // Utiliser cURL pour le multipart
         $ch = curl_init();
@@ -154,7 +153,7 @@ class ApiService
      */
     public function putMultipart(string $endpoint, array $data, ?string $token = null): array
     {
-        $url = self::API_BASE . $endpoint;
+        $url = $this->apiBase . $endpoint;
 
         // Utiliser cURL pour le multipart PUT
         $ch = curl_init();
