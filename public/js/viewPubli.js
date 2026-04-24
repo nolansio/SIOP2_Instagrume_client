@@ -63,6 +63,8 @@ async function toggleLike(id, type) {
             : `/likes/comment/id/${id}`;
 
     try {
+        location.reload(); // Le rechargement ce fini après la requête
+
         const response = await fetch(API_BASE + endpoint, {
             method: "POST",
             headers: {
@@ -71,10 +73,7 @@ async function toggleLike(id, type) {
             },
         });
 
-        if (response.ok || response.status === 409) {
-            // Recharger la page pour mettre à jour les compteurs
-            location.reload();
-        } else {
+        if (!response.ok && response.status !== 409) {
             const error = await response.json();
             console.error("Erreur API:", error);
             alert("Erreur: " + (error.error || JSON.stringify(error)));
@@ -92,6 +91,8 @@ async function toggleDislike(id, type) {
             : `/dislikes/comment/id/${id}`;
 
     try {
+        location.reload(); // Le rechargement ce fini après la requête
+
         const response = await fetch(API_BASE + endpoint, {
             method: "POST",
             headers: {
@@ -100,10 +101,7 @@ async function toggleDislike(id, type) {
             },
         });
 
-        if (response.ok || response.status === 409) {
-            // Recharger la page pour mettre à jour
-            location.reload();
-        } else {
+        if (!response.ok && response.status !== 409) {
             const error = await response.json();
             console.error("Erreur API:", error);
             alert("Erreur: " + (error.error || JSON.stringify(error)));
