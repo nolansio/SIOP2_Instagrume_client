@@ -1,4 +1,4 @@
-const API_BASE = "https://127.0.0.1:3000/api";
+const API_BASE = window.API_BASE + "/api";
 // Récupérer le token depuis la variable globale injectée par Twig
 const TOKEN = window.API_TOKEN || null;
 
