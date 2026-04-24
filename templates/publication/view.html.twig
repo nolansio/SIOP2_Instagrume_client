@@ -18,8 +18,8 @@
         {# Images avec carousel #}
         {% if publication.images is not empty %}
             {% if publication.images|length == 1 %}
-                <img 
-                    src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                <img
+                    src="{{ api_base }}{{ publication.images[0].url }}"
                     alt="{{ publication.description }}"
                     style="width: 100%; height: 500px; object-fit: contain; background: var(--amber-1); border-radius: var(--radius-lg) var(--radius-lg) 0 0;"
                 >
@@ -28,8 +28,8 @@
                     <div class="carousel-inner">
                         {% for image in publication.images %}
                             <div class="carousel-item {% if loop.first %}active{% endif %}">
-                                <img 
-                                    src="https://127.0.0.1:3000{{ image.url }}" 
+                                <img
+                                    src="{{ api_base }}{{ image.url }}"
                                     alt="{{ publication.description }}"
                                 >
                             </div>
@@ -41,7 +41,7 @@
                     <button class="carousel-control carousel-control-next" onclick="moveCarousel(1)">
                         <i class="bi bi-chevron-right"></i>
                     </button>
-                    
+
                     {# Compteur d'images #}
                     <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); background: rgba(0,0,0,0.7); color: white; padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--radius-sm); font-size: var(--font-size-sm); font-weight: 600;">
                         <span id="current-slide">1</span> / {{ publication.images|length }}
@@ -49,14 +49,14 @@
                 </div>
             {% endif %}
         {% endif %}
-        
+
         <div class="card-body">
             {# En-tête avec auteur #}
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); padding-bottom: var(--spacing-lg); border-bottom: 1px solid var(--color-border-light);">
                 <div style="display: flex; align-items: center; gap: var(--spacing-md);">
                     {% if publication.user.images is defined and publication.user.images is not empty %}
-                        <img 
-                            src="https://127.0.0.1:3000{{ publication.user.images[0].url }}" 
+                        <img
+                            src="{{ api_base }}{{ publication.user.images[0].url }}"
                             alt="{{ publication.user.username }}"
                             style="width: 56px; height: 56px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--color-primary);"
                         >
@@ -72,7 +72,7 @@
                         </p>
                     </div>
                 </div>
-                
+
                 {# Actions si c'est l'auteur #}
                 {% if app.session.get('user') and app.session.get('user').username == publication.user.username %}
                     <div style="display: flex; gap: var(--spacing-sm);">
@@ -87,12 +87,12 @@
                     </div>
                 {% endif %}
             </div>
-            
+
             {# Description #}
             <div>
                 <p style="font-size: var(--font-size-base); line-height: 1.6; color: var(--color-text-primary); white-space: pre-wrap;">{{ publication.description }}</p>
             </div>
-            
+
             {# Actions auteur ou modérateur #}
             {% if app.session.get('user') %}
                 <div style="display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg);">
@@ -124,28 +124,28 @@
                     {% set currentUserId = app.session.get('user').id %}
                     {% set userHasLiked = false %}
                     {% set userHasDisliked = false %}
-                    
+
                     {# Vérifier si l'utilisateur a liké #}
                     {% for like in publication.likes %}
                         {% if like.user.id == currentUserId %}
                             {% set userHasLiked = true %}
                         {% endif %}
                     {% endfor %}
-                    
+
                     {# Vérifier si l'utilisateur a disliké #}
                     {% for dislike in publication.dislikes %}
                         {% if dislike.user.id == currentUserId %}
                             {% set userHasDisliked = true %}
                         {% endif %}
                     {% endfor %}
-                    
+
                     {# Bouton Like - cliquable #}
                     <button class="btn btn-ghost" onclick="toggleLike({{ publication.id }}, 'publication')" id="like-btn-pub-{{ publication.id }}" style="display: flex; align-items: center; gap: var(--spacing-sm); {% if userHasLiked %}color: var(--color-primary); font-weight: 600;{% endif %}">
                         <i class="bi bi-heart{% if userHasLiked %}-fill{% endif %}" id="like-icon-pub-{{ publication.id }}" style="font-size: 1.25rem;"></i>
                         <span style="font-weight: 600;" id="like-count-pub-{{ publication.id }}">{{ publication.likes|length }}</span>
                         <span style="font-size: var(--font-size-sm);">j'aime</span>
                     </button>
-                    
+
                     {# Bouton Dislike - cliquable, sans compteur #}
                     <button class="btn btn-ghost" onclick="toggleDislike({{ publication.id }}, 'publication')" id="dislike-btn-pub-{{ publication.id }}" style="display: flex; align-items: center; gap: var(--spacing-sm); {% if userHasDisliked %}color: var(--color-primary); font-weight: 600;{% endif %}">
                         <i class="bi bi-heartbreak{% if userHasDisliked %}-fill{% endif %}" id="dislike-icon-pub-{{ publication.id }}" style="font-size: 1.25rem;"></i>
@@ -159,18 +159,18 @@
                         <span style="font-size: var(--font-size-sm);">j'aime</span>
                     </div>
                 {% endif %}
-                
+
                 <div style="display: flex; align-items: center; gap: var(--spacing-sm); color: var(--color-text-muted);">
                     <i class="bi bi-chat" style="font-size: 1.25rem;"></i>
                     <span style="font-weight: 600;">{{ publication.comments|length }}</span>
                     <span style="font-size: var(--font-size-sm);">commentaires</span>
                 </div>
             </div>
-            
+
             {# Section commentaires #}
             <div style="margin-top: var(--spacing-xl);">
                 <h3 style="font-size: var(--font-size-xl); margin-bottom: var(--spacing-lg);">Commentaires</h3>
-                
+
                 {# Message si publication verrouillée #}
                 {% if publication.is_locked == 1 or publication.is_locked == true or publication.is_locked == "1" %}
                     <div class="alert alert-warning" style="margin-bottom: var(--spacing-lg);">
@@ -178,17 +178,17 @@
                         <span>Cette publication est verrouillée. Les commentaires sont désactivés.</span>
                     </div>
                 {% endif %}
-                
+
                 {# Formulaire pour ajouter un commentaire (si connecté ET pas verrouillé) #}
                 {% set isLocked = publication.is_locked == 1 or publication.is_locked == true or publication.is_locked == "1" %}
                 {% if app.session.get('token') and not isLocked %}
                     <div style="margin-bottom: var(--spacing-xl); padding: var(--spacing-lg); background: var(--color-background-alt); border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
                         <form id="comment-form" onsubmit="postComment(event, {{ publication.id }}, null)">
                             <div class="form-group" style="margin-bottom: var(--spacing-md);">
-                                <textarea 
-                                    class="form-textarea" 
+                                <textarea
+                                    class="form-textarea"
                                     id="comment-input"
-                                    rows="3" 
+                                    rows="3"
                                     placeholder="Écrire un commentaire..."
                                     required
                                 ></textarea>
@@ -202,7 +202,7 @@
                         </form>
                     </div>
                 {% endif %}
-                
+
                 {% if publication.comments is empty %}
                     <div class="text-center" style="padding: var(--spacing-xl); color: var(--color-text-muted);">
                         <i class="bi bi-chat-dots" style="font-size: 2rem; display: block; margin-bottom: var(--spacing-sm);"></i>
@@ -225,7 +225,7 @@
             </div>
         </div>
     </div>
-    
+
     {# Bouton retour #}
     <div style="margin-top: var(--spacing-xl);">
         <a href="{{ path('app_home') }}" class="btn btn-secondary">
@@ -240,8 +240,8 @@
     <div class="comment-item" id="comment-{{ comment.id }}" style="margin-left: {{ comment.original_comment ? '2rem' : '0' }};">
         <div style="display: flex; gap: var(--spacing-md);">
             {% if comment.user.images is defined and comment.user.images is not empty %}
-                <img 
-                    src="https://127.0.0.1:3000{{ comment.user.images[0].url }}" 
+                <img
+                    src="{{ api_base }}{{ comment.user.images[0].url }}"
                     alt="{{ comment.user.username }}"
                     style="width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary); flex-shrink: 0;"
                 >
@@ -260,39 +260,39 @@
                 <p style="color: var(--color-text-primary); margin: 0 0 var(--spacing-sm) 0;">
                     {{ comment.content }}
                 </p>
-                
+
                 {# Actions du commentaire #}
                 <div style="display: flex; align-items: center; gap: var(--spacing-lg); font-size: var(--font-size-sm);">
                     {% if app.session.get('token') and app.session.get('user') and app.session.get('user').username != comment.user.username %}
                         {% set currentUserId = app.session.get('user').id %}
                         {% set userHasLikedComment = false %}
                         {% set userHasDislikedComment = false %}
-                        
+
                         {# Vérifier si l'utilisateur a liké ce commentaire #}
                         {% for like in comment.likes %}
                             {% if like.user.id == currentUserId %}
                                 {% set userHasLikedComment = true %}
                             {% endif %}
                         {% endfor %}
-                        
+
                         {# Vérifier si l'utilisateur a disliké ce commentaire #}
                         {% for dislike in comment.dislikes %}
                             {% if dislike.user.id == currentUserId %}
                                 {% set userHasDislikedComment = true %}
                             {% endif %}
                         {% endfor %}
-                        
+
                         {# Like #}
                         <button class="btn btn-ghost btn-sm" onclick="toggleLike({{ comment.id }}, 'comment')" id="like-btn-com-{{ comment.id }}" style="padding: var(--spacing-xs) var(--spacing-sm); {% if userHasLikedComment %}color: var(--color-primary); font-weight: 600;{% endif %}">
                             <i class="bi bi-heart{% if userHasLikedComment %}-fill{% endif %}" id="like-icon-com-{{ comment.id }}"></i>
                             <span id="like-count-com-{{ comment.id }}">{{ comment.likes|length }}</span>
                         </button>
-                        
+
                         {# Dislike #}
                         <button class="btn btn-ghost btn-sm" onclick="toggleDislike({{ comment.id }}, 'comment')" id="dislike-btn-com-{{ comment.id }}" style="padding: var(--spacing-xs) var(--spacing-sm); {% if userHasDislikedComment %}color: var(--color-primary); font-weight: 600;{% endif %}">
                             <i class="bi bi-heartbreak{% if userHasDislikedComment %}-fill{% endif %}" id="dislike-icon-com-{{ comment.id }}"></i>
                         </button>
-                        
+
                         {# Répondre (seulement si pas verrouillé) #}
                         {% if not isLocked %}
                             <button class="btn btn-ghost btn-sm" onclick="showReplyForm({{ comment.id }}, '{{ comment.user.username }}')" style="padding: var(--spacing-xs) var(--spacing-sm);">
@@ -313,15 +313,15 @@
                         {% endif %}
                     {% endif %}
                 </div>
-                
+
                 {# Formulaire de réponse (caché par défaut) #}
                 <div id="reply-form-{{ comment.id }}" style="display: none; margin-top: var(--spacing-md); padding: var(--spacing-md); background: var(--color-background-alt); border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
                     <form onsubmit="postComment(event, {{ publicationId }}, {{ comment.id }})">
                         <div class="form-group" style="margin-bottom: var(--spacing-sm);">
-                            <textarea 
-                                class="form-textarea" 
+                            <textarea
+                                class="form-textarea"
                                 id="reply-input-{{ comment.id }}"
-                                rows="2" 
+                                rows="2"
                                 placeholder="Répondre à {{ comment.user.username }}..."
                                 required
                             ></textarea>
@@ -337,7 +337,7 @@
                         </div>
                     </form>
                 </div>
-                
+
                 {# Réponses (commentaires enfants) #}
                 {% if comment.comments is not empty %}
                     <div style="margin-top: var(--spacing-md);">

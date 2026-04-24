@@ -25,12 +25,12 @@
     <div class="card">
         <div class="card-body">
             <form method="post" enctype="multipart/form-data">
-                
+
                 {# Avatar actuel #}
                 <div style="text-align: center; margin-bottom: var(--spacing-xl);">
                     {% if user.images is defined and user.images is not empty %}
-                        <img 
-                            src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                        <img
+                            src="{{ api_base }}{{ user.images[0].url }}"
                             alt="{{ user.username }}"
                             style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--color-primary);"
                         >
@@ -47,11 +47,11 @@
                     <label for="username" class="form-label">
                         <i class="bi bi-person"></i> Nom d'utilisateur
                     </label>
-                    <input 
-                        type="text" 
-                        class="form-input" 
-                        id="username" 
-                        name="username" 
+                    <input
+                        type="text"
+                        class="form-input"
+                        id="username"
+                        name="username"
                         value="{{ user.username }}"
                         placeholder="Votre nom d'utilisateur"
                     >
@@ -74,11 +74,11 @@
                     <label for="password" class="form-label">
                         <i class="bi bi-key"></i> Nouveau mot de passe
                     </label>
-                    <input 
-                        type="password" 
-                        class="form-input" 
-                        id="password" 
-                        name="password" 
+                    <input
+                        type="password"
+                        class="form-input"
+                        id="password"
+                        name="password"
                         placeholder="Nouveau mot de passe (optionnel)"
                         minlength="6"
                     >
@@ -92,11 +92,11 @@
                     <label for="confirm_password" class="form-label">
                         <i class="bi bi-key-fill"></i> Confirmer le nouveau mot de passe
                     </label>
-                    <input 
-                        type="password" 
-                        class="form-input" 
-                        id="confirm_password" 
-                        name="confirm_password" 
+                    <input
+                        type="password"
+                        class="form-input"
+                        id="confirm_password"
+                        name="confirm_password"
                         placeholder="Confirmez le nouveau mot de passe"
                     >
                 </div>
@@ -108,25 +108,25 @@
                     <label for="avatar" class="form-label">
                         <i class="bi bi-image"></i> Changer l'avatar
                     </label>
-                    <input 
-                        type="file" 
-                        class="form-input" 
-                        id="avatar" 
-                        name="avatar" 
+                    <input
+                        type="file"
+                        class="form-input"
+                        id="avatar"
+                        name="avatar"
                         accept="image/*"
                         onchange="previewAvatar(event)"
                     >
                     <small style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-top: var(--spacing-xs); display: block;">
                         Formats acceptés : JPG, PNG, GIF, WebP
                     </small>
-                    
+
                     {# Preview #}
                     <div id="avatar-preview" style="display: none; margin-top: var(--spacing-md); text-align: center;">
                         <p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: var(--spacing-sm);">
                             Aperçu :
                         </p>
-                        <img 
-                            id="avatar-preview-img" 
+                        <img
+                            id="avatar-preview-img"
                             style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--color-primary);"
                             alt="Aperçu"
                         >
@@ -135,7 +135,7 @@
                     <hr style="border-top: 1px solid var(--color-border-light); margin: var(--spacing-xl) 0;">
 
                     <h3 style="font-size: var(--font-size-lg); font-weight: 600; margin-bottom: var(--spacing-md);">
-                        Confirmer les modifications avec votre mot de passe actuel 
+                        Confirmer les modifications avec votre mot de passe actuel
                     </h3>
 
                     {# Mot de passe actuel (obligatoire) #}
@@ -143,11 +143,11 @@
                         <label for="current_password" class="form-label">
                             <i class="bi bi-shield-lock"></i> Mot de passe actuel *
                         </label>
-                        <input 
-                            type="password" 
-                            class="form-input" 
-                            id="current_password" 
-                            name="current_password" 
+                        <input
+                            type="password"
+                            class="form-input"
+                            id="current_password"
+                            name="current_password"
                             required
                             placeholder="Votre mot de passe actuel"
                         >

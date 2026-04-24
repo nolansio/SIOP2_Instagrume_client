@@ -11,9 +11,9 @@
                 {# Avatar #}
                 <div style="flex-shrink: 0;">
                     {% if user.images is not empty %}
-                        <img 
-                            src="https://127.0.0.1:3000{{ user.images[0].url }}" 
-                            alt="{{ user.username }}" 
+                        <img
+                            src="{{ api_base }}{{ user.images[0].url }}"
+                            alt="{{ user.username }}"
                             style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--color-primary);"
                         >
                     {% else %}
@@ -22,12 +22,12 @@
                         </div>
                     {% endif %}
                 </div>
-                
+
                 {# Informations #}
                 <div style="flex: 1; min-width: 250px;">
                     <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md); flex-wrap: wrap;">
                         <h1 style="font-size: var(--font-size-3xl); margin: 0;">{{ user.username }}</h1>
-                        
+
                         {# Badges de rôle #}
                         {% if 'ROLE_ADMIN' in user.roles %}
                             <span class="badge badge-admin">
@@ -40,7 +40,7 @@
                                 Modérateur
                             </span>
                         {% endif %}
-                        
+
                         {# Badge banni #}
                         {% if is_banned(user) %}
                             <span class="badge badge-banned">
@@ -49,7 +49,7 @@
                             </span>
                         {% endif %}
                     </div>
-                    
+
                     {# Stats #}
                     <div style="display: flex; gap: var(--spacing-xl); margin-bottom: var(--spacing-lg);">
                         <div>
@@ -59,7 +59,7 @@
                             <span class="text-muted" style="font-size: var(--font-size-sm);">publications</span>
                         </div>
                     </div>
-                    
+
                     {# Bouton édition si c'est son profil #}
                     {% if app.session.get('user') and app.session.get('user').username == user.username %}
                         <a href="{{ path('app_profile_edit') }}" class="btn btn-secondary">
@@ -71,11 +71,11 @@
             </div>
         </div>
     </div>
-    
+
     {# Grille de publications #}
     <div>
         <h2 style="margin-bottom: var(--spacing-lg);">Publications</h2>
-        
+
         {% if publications is empty %}
             <div class="card">
                 <div class="card-body" style="text-align: center; padding: var(--spacing-3xl);">
@@ -102,8 +102,8 @@
                     <a href="{{ path('app_publication_view', {id: publication.id}) }}" style="text-decoration: none; color: inherit;">
                         <article class="publication-card">
                             {% if publication.images is not empty %}
-                                <img 
-                                    src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                                <img
+                                    src="{{ api_base }}{{ publication.images[0].url }}"
                                     alt="{{ publication.description }}"
                                     class="publication-image"
                                 >
@@ -112,12 +112,12 @@
                                     <i class="bi bi-image" style="font-size: 3rem; color: var(--amber-8);"></i>
                                 </div>
                             {% endif %}
-                            
+
                             <div class="publication-info">
                                 <p style="color: var(--color-text-secondary); font-size: var(--font-size-sm); line-height: 1.5; margin: 0 0 var(--spacing-sm) 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                                     {{ publication.description }}
                                 </p>
-                                
+
                                 <div style="display: flex; gap: var(--spacing-lg); font-size: var(--font-size-sm); color: var(--color-text-muted);">
                                     <span>
                                         <i class="bi bi-heart"></i>

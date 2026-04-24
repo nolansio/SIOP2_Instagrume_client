@@ -8,10 +8,10 @@
 
 {% block body %}
 <div class="container" style="max-width: 1400px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-md);">
-    
+
     {# Vérification des permissions #}
     {% if app.session.get('user') and ('ROLE_MOD' in app.session.get('user').roles or 'ROLE_ADMIN' in app.session.get('user').roles) %}
-        
+
         {# En-tête #}
         <div style="margin-bottom: var(--spacing-xl);">
             <h1 style="font-size: var(--font-size-3xl); font-weight: 700; margin-bottom: var(--spacing-xs);">
@@ -135,8 +135,8 @@
                                     {# Avatar #}
                                     <td style="padding: var(--spacing-md);">
                                         {% if user.images is defined and user.images is not empty %}
-                                            <img 
-                                                src="https://127.0.0.1:3000{{ user.images[0].url }}" 
+                                            <img
+                                                src="{{ api_base }}{{ user.images[0].url }}"
                                                 alt="{{ user.username }}"
                                                 style="width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary);"
                                             >
@@ -250,8 +250,8 @@
                                         {# Image #}
                                         <td style="padding: var(--spacing-md);">
                                             {% if publication.images is not empty %}
-                                                <img 
-                                                    src="https://127.0.0.1:3000{{ publication.images[0].url }}" 
+                                                <img
+                                                    src="{{ api_base }}{{ publication.images[0].url }}"
                                                     alt="Publication"
                                                     style="width: 60px; height: 60px; border-radius: var(--radius-md); object-fit: cover;"
                                                 >
@@ -311,7 +311,7 @@
                                                 <a href="{{ path('app_publication_view', {id: publication.id}) }}" class="btn btn-sm btn-ghost" style="padding: var(--spacing-xs); font-size: var(--font-size-xs);" title="Voir">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
-                                                
+
                                                 {% if publication.is_locked %}
                                                     <form method="post" action="{{ path('app_publication_unlock', {id: publication.id}) }}" style="display: inline;">
                                                         <button type="submit" class="btn btn-sm" style="background: var(--color-success); color: white; padding: var(--spacing-xs); font-size: var(--font-size-xs);" title="Déverrouiller">
@@ -374,7 +374,7 @@
             <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-lg);">
                 Bannir <strong id="ban-username"></strong> ?
             </p>
-            
+
             <form id="ban-form" method="post" data-ban-url="{{ path('app_moderation_ban', {id: 0}) }}">>
                 <div class="form-group">
                     <label for="ban_duration" class="form-label">Durée du bannissement (en jours)</label>

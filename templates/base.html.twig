@@ -7,13 +7,13 @@
 
     {# Favicon SVG #}
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
-    
+
     {# Nouveau CSS custom #}
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    
+
     {# Bootstrap Icons (gardés pour les icônes) #}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
+
     {% block stylesheets %}{% endblock %}
 </head>
 <body>
@@ -25,15 +25,15 @@
                 <img src="{{ asset('images/logo.png') }}" alt="Instagrume Logo" style="height: 40px; width: auto; vertical-align: middle;">
                 <span>Instagrume</span>
             </a>
-            
+
             {# Barre de recherche #}
             <div class="navbar-search">
                 <form action="{{ path('app_search') }}" method="get">
                     <div style="position: relative;">
-                        <input 
-                            type="search" 
-                            name="q" 
-                            placeholder="Rechercher un utilisateur..." 
+                        <input
+                            type="search"
+                            name="q"
+                            placeholder="Rechercher un utilisateur..."
                             class="form-input"
                             style="padding-left: 2.5rem;"
                         >
@@ -41,7 +41,7 @@
                     </div>
                 </form>
             </div>
-            
+
             {# Navigation principale #}
             <ul class="navbar-nav">
                 {% if app.session.get('token') %}
@@ -51,7 +51,7 @@
                             <span>Créer</span>
                         </a>
                     </li>
-                    
+
                     {# Dashboard pour mod/admin #}
                     {% if app.session.get('user') and (('ROLE_MOD' in app.session.get('user').roles) or ('ROLE_ADMIN' in app.session.get('user').roles)) %}
                         <li>
@@ -60,28 +60,28 @@
                             </a>
                         </li>
                     {% endif %}
-                    
+
                     {# Accueil #}
                     <li>
                         <a href="{{ path('app_home') }}">
                             <span>Accueil</span>
                         </a>
                     </li>
-                    
+
                     {# Profil avec avatar #}
                     <li>
                         <a href="{{ path('app_my_profile') }}" style="display: flex; align-items: center; gap: var(--spacing-sm);">
                             {# Avatar ou icône par défaut #}
                             {% if app.session.get('user') and app.session.get('user').images is not empty %}
-                                <img 
-                                    src="https://127.0.0.1:3000{{ app.session.get('user').images[0].url }}" 
+                                <img
+                                    src="{{ api_base }}{{ app.session.get('user').images[0].url }}"
                                     alt="{{ app.session.get('user').username }}"
                                     style="width: 32px; height: 32px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--color-primary);"
                                 >
                             {% else %}
                                 <i class="bi bi-person-circle"></i>
                             {% endif %}
-                            
+
                             <span>
                                 {% if app.session.get('user') %}
                                     {{ app.session.get('user').username }}
@@ -91,7 +91,7 @@
                             </span>
                         </a>
                     </li>
-                    
+
                     {# Déconnexion #}
                     <li>
                         <a href="{{ path('app_logout') }}" class="btn btn-outline">
@@ -116,7 +116,7 @@
             </ul>
         </div>
     </nav>
-    
+
     {# Messages flash #}
     {% for label, messages in app.flashes %}
         {% for message in messages %}
@@ -133,7 +133,7 @@
     <main class="container" style="margin-top: var(--spacing-2xl); margin-bottom: var(--spacing-3xl);">
         {% block body %}{% endblock %}
     </main>
-    
+
     {# Footer minimaliste #}
     <footer style="background: var(--color-surface); border-top: 1px solid var(--color-border); padding: var(--spacing-xl) 0; margin-top: auto;">
         <div class="container">
@@ -147,7 +147,7 @@
             </div>
         </div>
     </footer>
-    
+
     {% block javascripts %}{% endblock %}
 </body>
 </html>
